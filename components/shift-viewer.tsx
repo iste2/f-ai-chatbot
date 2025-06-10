@@ -5,6 +5,8 @@ type Shift = {
   employeeName: string;
   shiftName: string;
   date: string; // YYYY-MM-DD
+  colorCode: string;
+  duration: number;
 };
 
 interface ShiftViewerProps {
@@ -28,12 +30,12 @@ function getUniqueEmployees(shifts: Shift[]): { employeeId: string; employeeName
     .sort((a, b) => a.employeeName.localeCompare(b.employeeName));
 }
 
-// Build a lookup: { [employeeId]: { [date]: shiftName } }
+// Build a lookup: { [employeeId]: { [date]: Shift } }
 function buildShiftLookup(shifts: Shift[]) {
-  const lookup: Record<string, Record<string, string>> = {};
-  shifts.forEach(({ employeeId, date, shiftName }) => {
-    if (!lookup[employeeId]) lookup[employeeId] = {};
-    lookup[employeeId][date] = shiftName;
+  const lookup: Record<string, Record<string, Shift>> = {};
+  shifts.forEach((shift) => {
+    if (!lookup[shift.employeeId]) lookup[shift.employeeId] = {};
+    lookup[shift.employeeId][shift.date] = shift;
   });
   return lookup;
 }
@@ -45,24 +47,35 @@ export const ShiftViewer: React.FC<ShiftViewerProps> = ({ shifts }) => {
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full border-collapse border border-gray-300">
+      <table className="min-w-full border-collapse">
         <thead>
           <tr>
-            <th className="border px-2 py-1 bg-gray-100">Employee</th>
+            <th className="px-2 py-1 bg-gray-100">Employee</th>
             {dates.map((date) => (
-              <th key={date} className="border px-2 py-1 bg-gray-100 text-xs">{date}</th>
+              <th key={date} className="px-2 py-1 bg-gray-100 text-xs">{date}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {employees.map((emp) => (
             <tr key={emp.employeeId}>
-              <td className="border px-2 py-1 font-medium bg-gray-50">{emp.employeeName}</td>
+              <td className="px-2 py-1 font-medium bg-gray-50">{emp.employeeName}</td>
               {dates.map((date) => {
-                const shiftName = shiftLookup[emp.employeeId]?.[date];
+                const shift = shiftLookup[emp.employeeId]?.[date];
                 return (
-                  <td key={date} className="border px-2 py-1 text-center">
-                    {shiftName ? shiftName.charAt(0) : ""}
+                  <td key={date} className="px-2 py-1 text-center">
+                    {shift ? (
+                      <div
+                        className="rounded shadow text-xs flex flex-col items-center justify-center"
+                        style={{ backgroundColor: shift.colorCode, minWidth: 48, minHeight: 32 }}
+                        title={`${shift.shiftName} (${shift.duration}h)`}
+                      >
+                        <span>{shift.shiftName.charAt(0)}</span>
+                        {shift.duration ? (
+                          <span className="text-[10px]">{shift.duration}h</span>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </td>
                 );
               })}
