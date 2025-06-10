@@ -19,6 +19,7 @@ import { MessageEditor } from './message-editor';
 import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
+import SqlViewer from './sql-viewer';
 
 const PurePreviewMessage = ({
   chatId,
@@ -216,6 +217,8 @@ const PurePreviewMessage = ({
                         <div className='flex flex-col items-center justify-center' style={{ background: result["color"]}}>
                           <h1>{result["number"]}</h1>
                         </div>
+                      ) : toolName === 'sqlTool' ? (
+                        <SqlViewer initialQuery={result["query"]} />
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
