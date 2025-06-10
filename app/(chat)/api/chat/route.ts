@@ -4,7 +4,6 @@ import {
   createDataStream,
   smoothStream} from 'ai';
 import { auth, type UserType } from '@/app/(auth)/auth';
-import { type RequestHints } from '@/lib/ai/prompts';
 import {
   createStreamId,
   deleteChatById,
@@ -19,7 +18,6 @@ import { generateUUID, getTrailingMessageId } from '@/lib/utils';
 import { generateTitleFromUserMessage } from '../../actions';
 import { entitlementsByUserType } from '@/lib/ai/entitlements';
 import { postRequestBodySchema, type PostRequestBody } from './schema';
-import { geolocation } from '@vercel/functions';
 import type { Chat } from '@/lib/db/schema';
 import { differenceInSeconds } from 'date-fns';
 import { ChatSDKError } from '@/lib/errors';
@@ -104,7 +102,7 @@ export async function POST(request: Request) {
     const stream = createDataStream({
       execute: async (dataStream) => {
         const agent = mastra.getAgent('randomAgent');
-        const result = await agent!.stream(
+        const result = await agent?.stream(
           messages.map((message) => JSON.stringify(message)),
           {
             experimental_transform: smoothStream({ chunking: 'word' }),

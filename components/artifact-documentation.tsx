@@ -11,7 +11,7 @@ export const ArtifactDocumentation: React.FC<ArtifactDocumentationProps> = ({ do
   if (!documentation) return null;
   const PREVIEW_LENGTH = 150;
   const isLong = documentation.length > PREVIEW_LENGTH;
-  const preview = isLong ? documentation.slice(0, PREVIEW_LENGTH) + "..." : documentation;
+  const preview = isLong ? `${documentation.slice(0, PREVIEW_LENGTH)}...` : documentation;
 
   return (
     <Card className="my-4">

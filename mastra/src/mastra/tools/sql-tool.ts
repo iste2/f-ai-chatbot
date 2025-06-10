@@ -1,7 +1,7 @@
 import { createTool } from "@mastra/core";
 import { z } from "zod";
 import Database from 'better-sqlite3';
-import path from "path";
+import path from "node:path";
 
 const description = `Felios Project Database Schema Overview
 
@@ -109,7 +109,7 @@ export const sqlTool = createTool({
         // Get the result of the query from felios project database, query the database directly
         const dbPath = path.join(process.cwd(), 'lib', 'db', 'felios-data', 'felios.db');
         const db = new Database(dbPath, { readonly: true });
-        let result;
+        let result : any;
         let valid = true;
         try {
             
@@ -121,7 +121,7 @@ export const sqlTool = createTool({
             }
         } catch (error) {
             console.error('Error executing SQL query:', error);
-            result = 'Error executing SQL query: ' + error;
+            result = `Error executing SQL query: ${error}`;
             valid = false;
         } finally {
             db.close();

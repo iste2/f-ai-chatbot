@@ -71,13 +71,19 @@ export const SqlViewer: React.FC<SqlViewerProps> = ({ initialQuery = '', valid =
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((row, i) => (
-                      <tr key={i}>
-                        {Object.values(row).map((val, j) => (
-                          <td key={j} className="px-2 py-1 border-b">{String(val)}</td>
-                        ))}
-                      </tr>
-                    ))}
+                    {data.map((row) => {
+                      const rowKey = Object.values(row).join('-');
+                      return (
+                        <tr key={rowKey}>
+                          {Object.values(row).map((val, j) => {
+                            const cellKey = `${Object.values(row).join('-')}-${j}`;
+                            return (
+                              <td key={cellKey} className="px-2 py-1 border-b">{String(val)}</td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               ) : data && Array.isArray(data) && data.length === 0 ? (

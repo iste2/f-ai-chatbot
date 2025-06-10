@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
-import path from 'path';
+import path from 'node:path';
 
 // Path to the SQLite database
 const dbPath = path.join(process.cwd(), 'lib', 'db', 'felios-data', 'felios.db');
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     }
     const db = new Database(dbPath, { readonly: true });
     const stmt = db.prepare(query);
-    let result;
+    let result : any;
     if (/^\s*select/i.test(query)) {
       result = stmt.all();
     } else {
