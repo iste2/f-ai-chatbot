@@ -80,8 +80,13 @@ Milestones are linked to projects.`;
 export const databaseSchemaDescriptionTool = createTool({
     id: 'felios-database-schema-description',
     description: 'Get the description of the database schema for the Felios project, including tables, relationships, and key points for query generation.',
+    outputSchema: z.object({
+        description: z.string().describe('The description of the Felios project database schema, including tables, relationships, and key points for query generation.'),
+    }),
     execute: async () => {
-        return description;
+        return {
+            description: description,
+        };
     },
 });
 
@@ -94,6 +99,7 @@ export const sqlTool = createTool({
     outputSchema: z.object({
         query: z.string().describe('The query to be shown in the UI.'),
         result: z.any().describe('The result of the SQL query.'),
+        valid: z.boolean().describe('Indicates whether the query was valid and executed successfully.'),
     }),
     execute: async ({ context: { query } }) => {
         // Only select queries are allowed for security reasons
@@ -104,6 +110,7 @@ export const sqlTool = createTool({
         const dbPath = path.join(process.cwd(), 'lib', 'db', 'felios-data', 'felios.db');
         const db = new Database(dbPath, { readonly: true });
         let result;
+        let valid = true;
         try {
             
             const stmt = db.prepare(query);
@@ -115,6 +122,7 @@ export const sqlTool = createTool({
         } catch (error) {
             console.error('Error executing SQL query:', error);
             result = 'Error executing SQL query: ' + error;
+            valid = false;
         } finally {
             db.close();
         }
@@ -122,6 +130,7 @@ export const sqlTool = createTool({
         return {
             query: query.trim(),
             result: JSON.stringify(result),
+            valid,
         };
     },
 });

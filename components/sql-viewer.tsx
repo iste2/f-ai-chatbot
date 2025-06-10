@@ -4,9 +4,10 @@ import { Button } from './ui/button';
 
 interface SqlViewerProps {
   initialQuery?: string;
+  valid?: boolean;
 }
 
-export const SqlViewer: React.FC<SqlViewerProps> = ({ initialQuery = '' }) => {
+export const SqlViewer: React.FC<SqlViewerProps> = ({ initialQuery = '', valid = true }) => {
   const [query, setQuery] = useState(initialQuery);
   const [data, setData] = useState<any[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,52 +34,58 @@ export const SqlViewer: React.FC<SqlViewerProps> = ({ initialQuery = '' }) => {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto my-8">
+    <Card className={`w-full max-w-4xl mx-auto my-8`}>
       <CardHeader>
         <CardTitle>SQL Viewer</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
-          <textarea
-            className="w-full border rounded p-2 font-mono text-sm"
-            rows={3}
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="Enter your SQL query here..."
-          />
-          <Button
-            className="mt-2"
-            onClick={handleRun}
-            disabled={loading || !query.trim()}
-          >
-            {loading ? 'Running...' : 'Run Query'}
-          </Button>
-        </div>
-        <div className="overflow-x-auto max-h-96 border rounded bg-muted p-2">
-          {error && <div className="text-red-600 mb-2">{error}</div>}
-          {data && Array.isArray(data) && data.length > 0 ? (
-            <table className="min-w-full text-xs">
-              <thead>
-                <tr>
-                  {Object.keys(data[0]).map((col) => (
-                    <th key={col} className="px-2 py-1 text-left border-b bg-card font-bold">{col}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((row, i) => (
-                  <tr key={i}>
-                    {Object.values(row).map((val, j) => (
-                      <td key={j} className="px-2 py-1 border-b">{String(val)}</td>
+        {!valid ? (
+          <div className="font-normal text-center py-2 min-h-0 h-16 flex items-center justify-center">Invalid query or insufficient permissions.</div>
+        ) : (
+          <>
+            <div className="mb-4">
+              <textarea
+                className="w-full border rounded p-2 font-mono text-sm"
+                rows={3}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Enter your SQL query here..."
+              />
+              <Button
+                className="mt-2"
+                onClick={handleRun}
+                disabled={loading || !query.trim()}
+              >
+                {loading ? 'Running...' : 'Run Query'}
+              </Button>
+            </div>
+            <div className="overflow-x-auto max-h-96 border rounded bg-muted p-2">
+              {error && <div className="text-red-600 mb-2">{error}</div>}
+              {data && Array.isArray(data) && data.length > 0 ? (
+                <table className="min-w-full text-xs">
+                  <thead>
+                    <tr>
+                      {Object.keys(data[0]).map((col) => (
+                        <th key={col} className="px-2 py-1 text-left border-b bg-card font-bold">{col}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.map((row, i) => (
+                      <tr key={i}>
+                        {Object.values(row).map((val, j) => (
+                          <td key={j} className="px-2 py-1 border-b">{String(val)}</td>
+                        ))}
+                      </tr>
                     ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : data && Array.isArray(data) && data.length === 0 ? (
-            <div className="text-muted-foreground">No results.</div>
-          ) : null}
-        </div>
+                  </tbody>
+                </table>
+              ) : data && Array.isArray(data) && data.length === 0 ? (
+                <div className="text-muted-foreground">No results.</div>
+              ) : null}
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
