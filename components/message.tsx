@@ -19,6 +19,8 @@ import { MessageEditor } from './message-editor';
 import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
+import SqlViewer from './sql-viewer';
+import ArtifactDocumentation from './artifact-documentation';
 
 const PurePreviewMessage = ({
   chatId,
@@ -212,10 +214,16 @@ const PurePreviewMessage = ({
                           result={result}
                           isReadonly={isReadonly}
                         />
+                      ) : toolName === 'databaseSchemaDescriptionTool' ? (
+                        <ArtifactDocumentation
+                          documentation={result.description}
+                        />
                       ) : toolName === 'randomTool' ? (
-                        <div className='flex flex-col items-center justify-center' style={{ background: result["color"]}}>
-                          <h1>{result["number"]}</h1>
+                        <div className='flex flex-col items-center justify-center' style={{ background: result.color}}>
+                          <h1>{result.number}</h1>
                         </div>
+                      ) : toolName === 'sqlTool' ? (
+                        <SqlViewer initialQuery={result.query} valid={result.valid} />
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
