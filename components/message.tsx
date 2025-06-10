@@ -221,10 +221,6 @@ const PurePreviewMessage = ({
                         <ArtifactDocumentation
                           documentation={result.description}
                         />
-                      ) : toolName === 'randomTool' ? (
-                        <div className='flex flex-col items-center justify-center' style={{ background: result.color}}>
-                          <h1>{result.number}</h1>
-                        </div>
                       ) : toolName === 'sqlTool' ? (
                         <SqlViewer initialQuery={result.query} valid={result.valid} />
                       ) : toolName === 'shiftViewerTool' ? (
