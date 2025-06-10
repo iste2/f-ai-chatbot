@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -73,8 +73,22 @@ function dateToX(date: string | null, min: Date, max: Date, chartWidth: number) 
   return ((t - t0) / (t1 - t0)) * chartWidth;
 }
 
+// Helper to get earliest start and latest end for a set of operations
+function getTimeline(operations: Operation[]): { start: string | null; end: string | null } {
+  const starts = operations.map((op) => op.startDate).filter(Boolean) as string[];
+  const ends = operations.map((op) => op.endDate).filter(Boolean) as string[];
+  if (starts.length === 0 || ends.length === 0) return { start: null, end: null };
+  return {
+    start: starts.reduce((a, b) => (a < b ? a : b)),
+    end: ends.reduce((a, b) => (a > b ? a : b)),
+  };
+}
+
 // Main GanttViewer component
 export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
+  // Expansion state (must be before any early return)
+  const [expandedProjects, setExpandedProjects] = useState<Record<number, boolean>>({});
+  const [expandedNetworks, setExpandedNetworks] = useState<Record<number, boolean>>({});
   // Flatten for date range
   const allOperations = getAllOperations(projects);
   const allMilestones = projects.flatMap((p) => p.milestones);
@@ -93,27 +107,41 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
   const rowHeight = 32;
   const labelWidth = 260;
   const chartWidth = 800;
-  // Build rows: each row is { type, label, operation?, milestone?, y }
+  const toggleProject = (id: number) =>
+    setExpandedProjects((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleNetwork = (id: number) =>
+    setExpandedNetworks((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  // Build rows: each row is { type, label, ... } and only visible if parent is expanded
   let rows: Array<
-    | { type: "project"; label: string; y: number }
-    | { type: "milestone"; label: string; y: number; milestone: Milestone }
-    | { type: "network"; label: string; y: number }
-    | { type: "operation"; label: string; y: number; operation: Operation }
+    | { type: "project"; label: string; y: number; timeline: { start: string | null; end: string | null }; id: number }
+    | { type: "milestone"; label: string; y: number; milestone: Milestone; timeline: { start: string | null; end: string | null }; projectId: number }
+    | { type: "network"; label: string; y: number; timeline: { start: string | null; end: string | null }; id: number; projectId: number }
+    | { type: "operation"; label: string; y: number; operation: Operation; networkId: number; projectId: number }
   > = [];
   let y = 0;
   for (const project of projects) {
-    rows.push({ type: "project", label: project.name, y });
+    const projectOps = project.networks.flatMap((n) => n.operations);
+    const projectTimeline = getTimeline(projectOps);
+    rows.push({ type: "project", label: project.name, y, timeline: projectTimeline, id: project.id });
     y += rowHeight;
-    for (const ms of project.milestones) {
-      rows.push({ type: "milestone", label: ms.name, y, milestone: ms });
-      y += rowHeight;
-    }
-    for (const network of project.networks) {
-      rows.push({ type: "network", label: network.name, y });
-      y += rowHeight;
-      for (const op of network.operations) {
-        rows.push({ type: "operation", label: op.name, y, operation: op });
+    if (expandedProjects[project.id]) {
+      for (const ms of project.milestones) {
+        const msOps = project.networks.flatMap((n) => n.operations);
+        const msTimeline = getTimeline(msOps);
+        rows.push({ type: "milestone", label: ms.name, y, milestone: ms, timeline: msTimeline, projectId: project.id });
         y += rowHeight;
+      }
+      for (const network of project.networks) {
+        const nwTimeline = getTimeline(network.operations);
+        rows.push({ type: "network", label: network.name, y, timeline: nwTimeline, id: network.id, projectId: project.id });
+        y += rowHeight;
+        if (expandedNetworks[network.id]) {
+          for (const op of network.operations) {
+            rows.push({ type: "operation", label: op.name, y, operation: op, networkId: network.id, projectId: project.id });
+            y += rowHeight;
+          }
+        }
       }
     }
   }
@@ -131,161 +159,255 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
         <CardTitle>Gantt Chart</CardTitle>
       </CardHeader>
       <CardContent>
-        <div style={{ display: "flex", flexDirection: "row" }}>
-          {/* Labels */}
-          <div style={{ width: labelWidth }}>
-            {rows.map((row, i) => (
-              <div
-                key={i}
-                style={{
-                  height: rowHeight,
-                  display: "flex",
-                  alignItems: "center",
-                  fontWeight:
-                    row.type === "project"
-                      ? 700
-                      : row.type === "network"
-                      ? 600
-                      : row.type === "milestone"
-                      ? 500
-                      : 400,
-                  color:
-                    row.type === "project"
-                      ? "#1e293b"
-                      : row.type === "network"
-                      ? "#334155"
-                      : row.type === "milestone"
-                      ? "#0e7490"
-                      : undefined,
-                }}
-              >
-                {row.label}
-                {row.type === "operation" && row.operation.employees.length > 0 && (
-                  <span style={{ fontSize: 12, marginLeft: 8, color: "#64748b" }}>
-                    [
-                    {row.operation.employees
-                      .map((e) => `${e.name} (${e.assignedCapacity})`)
-                      .join(", ")}
-                    ]
-                  </span>
-                )}
-                {row.type === "milestone" && row.milestone.dueDate && (
-                  <span style={{ fontSize: 12, marginLeft: 8, color: "#0e7490" }}>
-                    ({row.milestone.dueDate})
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-          {/* Chart SVG */}
-          <div style={{ flex: 1, overflowX: "auto" }}>
-            <svg width={chartWidth} height={chartHeight} style={{ background: "#f8fafc" }}>
-              {/* Grid lines */}
+        <div className="overflow-auto max-h-96 border rounded bg-muted">
+          <div style={{ display: "flex", flexDirection: "row" }}>
+            {/* Labels */}
+            <div style={{ width: labelWidth, display: "flex", flexDirection: "column", marginTop: 40 }}>
               {rows.map((row, i) => (
-                <rect
+                <div
                   key={i}
-                  x={0}
-                  y={i * rowHeight}
-                  width={chartWidth}
-                  height={rowHeight}
-                  fill={i % 2 === 0 ? "#f1f5f9" : "#e2e8f0"}
-                />
+                  style={{
+                    height: rowHeight,
+                    lineHeight: `${rowHeight}px`,
+                    display: "flex",
+                    alignItems: "center",
+                    fontWeight:
+                      row.type === "project"
+                        ? 700
+                        : row.type === "network"
+                        ? 600
+                        : row.type === "milestone"
+                        ? 500
+                        : 400,
+                    color:
+                      row.type === "project"
+                        ? "#1e293b"
+                        : row.type === "network"
+                        ? "#334155"
+                        : row.type === "milestone"
+                        ? "#0e7490"
+                        : undefined,
+                    cursor:
+                      row.type === "project" || row.type === "network"
+                        ? "pointer"
+                        : undefined,
+                    userSelect: "none",
+                    boxSizing: "border-box",
+                    padding: 0,
+                    margin: 0,
+                  }}
+                  onClick={() => {
+                    if (row.type === "project") toggleProject(row.id);
+                    if (row.type === "network") toggleNetwork(row.id);
+                  }}
+                >
+                  {row.type === "project" && (
+                    <span style={{ marginRight: 8, display: "inline-block", width: 16 }}>
+                      {expandedProjects[row.id] ? "▼" : "▶"}
+                    </span>
+                  )}
+                  {row.type === "network" && (
+                    <span style={{ marginRight: 8, display: "inline-block", width: 16 }}>
+                      {expandedNetworks[row.id] ? "▼" : "▶"}
+                    </span>
+                  )}
+                  {row.type !== "project" && row.type !== "network" && <span style={{ width: 24 }} />}
+                  {row.label}
+                  {row.type === "operation" && row.operation.employees.length > 0 && (
+                    <span style={{ fontSize: 12, marginLeft: 8, color: "#64748b" }}>
+                      [
+                      {row.operation.employees
+                        .map((e) => `${e.name} (${e.assignedCapacity})`)
+                        .join(", ")}
+                      ]
+                    </span>
+                  )}
+                  {row.type === "milestone" && row.milestone.dueDate && (
+                    <span style={{ fontSize: 12, marginLeft: 8, color: "#0e7490" }}>
+                      ({row.milestone.dueDate})
+                    </span>
+                  )}
+                </div>
               ))}
-              {/* Milestone markers */}
-              {rows.map(
-                (row, i) =>
-                  row.type === "milestone" &&
-                  row.milestone.dueDate && (
-                    <g key={"ms-" + i}>
-                      <rect
-                        x={dateToX(row.milestone.dueDate, minDate, maxDate, chartWidth) - 4}
-                        y={i * rowHeight + rowHeight / 2 - 8}
-                        width={8}
-                        height={16}
-                        fill="#0ea5e9"
-                        stroke="#0369a1"
-                        strokeWidth={1}
-                        rx={2}
-                      />
+            </div>
+            {/* Chart SVG */}
+            <div style={{ flex: 1, overflowX: "auto" }}>
+              {/* Timeline axis */}
+              <svg width={chartWidth} height={40} style={{ background: "#f8fafc" }}>
+                {/* Draw time axis ticks and labels */}
+                {(() => {
+                  const nTicks = 8;
+                  const ticks = Array.from({ length: nTicks + 1 }, (_, i) =>
+                    new Date(minDate.getTime() + ((maxDate.getTime() - minDate.getTime()) * i) / nTicks)
+                  );
+                  return (
+                    <g>
+                      {ticks.map((d, i) => (
+                        <g key={i}>
+                          <line
+                            x1={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
+                            y1={0}
+                            x2={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
+                            y2={40}
+                            stroke="#cbd5e1"
+                            strokeDasharray="2 2"
+                          />
+                          <text
+                            x={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
+                            y={32}
+                            fontSize={12}
+                            textAnchor="middle"
+                            fill="#334155"
+                          >
+                            {d.toISOString().slice(0, 10)}
+                          </text>
+                        </g>
+                      ))}
                     </g>
-                  )
-              )}
-              {/* Operation bars */}
-              {rows.map(
-                (row, i) =>
-                  row.type === "operation" &&
-                  row.operation.startDate &&
-                  row.operation.endDate && (
-                    <g key={"op-" + i}>
+                  );
+                })()}
+              </svg>
+              <svg width={chartWidth} height={chartHeight} style={{ background: "#f8fafc" }}>
+                {/* Grid lines */}
+                {rows.map((row, i) => (
+                  <rect
+                    key={i}
+                    x={0}
+                    y={i * rowHeight}
+                    width={chartWidth}
+                    height={rowHeight}
+                    fill={i % 2 === 0 ? "#f1f5f9" : "#e2e8f0"}
+                  />
+                ))}
+                {/* Timeline bars for project, network, milestone */}
+                {rows.map((row, i) => {
+                  if (
+                    (row.type === "project" || row.type === "network" || row.type === "milestone") &&
+                    row.timeline.start &&
+                    row.timeline.end
+                  ) {
+                    const x = dateToX(row.timeline.start, minDate, maxDate, chartWidth);
+                    const x2 = dateToX(row.timeline.end, minDate, maxDate, chartWidth);
+                    const color =
+                      row.type === "project"
+                        ? "#0ea5e9"
+                        : row.type === "network"
+                        ? "#38bdf8"
+                        : "#a21caf";
+                    return (
                       <rect
-                        x={dateToX(row.operation.startDate, minDate, maxDate, chartWidth)}
-                        y={i * rowHeight + 8}
-                        width={
-                          dateToX(row.operation.endDate, minDate, maxDate, chartWidth) -
-                          dateToX(row.operation.startDate, minDate, maxDate, chartWidth)
-                        }
-                        height={rowHeight - 16}
-                        fill="#38bdf8"
-                        stroke="#0ea5e9"
-                        strokeWidth={1}
+                        key={row.label + "-timeline"}
+                        x={x}
+                        y={i * rowHeight + 4}
+                        width={x2 - x}
+                        height={rowHeight - 8}
+                        fill={color}
+                        opacity={0.18}
                         rx={4}
                       />
-                    </g>
-                  )
-              )}
-              {/* Dependency arrows */}
-              {rows.flatMap((row, i) => {
-                if (row.type !== "operation") return [];
-                const fromIdx = i;
-                const fromOp = row.operation;
-                const fromX = dateToX(fromOp.startDate, minDate, maxDate, chartWidth);
-                const fromY = fromIdx * rowHeight + rowHeight / 2;
-                return fromOp.dependencies.map((depId) => {
-                  const toIdx = opIdToRowIdx[depId];
-                  if (toIdx === undefined) return null;
-                  const toOp = rows[toIdx] as typeof row;
-                  const toX = dateToX(
-                    toOp.operation.endDate,
-                    minDate,
-                    maxDate,
-                    chartWidth
-                  );
-                  const toY = toIdx * rowHeight + rowHeight / 2;
-                  // Draw a rectangular arrow: right from 'to', down, left to 'from', then arrowhead
-                  const midX = Math.max(fromX, toX) + 24;
-                  return (
-                    <g key={`dep-${fromOp.id}-${depId}`}>
-                      <polyline
-                        points={`
-                          ${toX},${toY}
-                          ${midX},${toY}
-                          ${midX},${fromY}
-                          ${fromX},${fromY}
-                        `}
-                        fill="none"
-                        stroke="#f59e42"
-                        strokeWidth={2}
-                        markerEnd="url(#arrowhead)"
-                      />
-                    </g>
-                  );
-                });
-              })}
-              {/* Arrowhead marker */}
-              <defs>
-                <marker
-                  id="arrowhead"
-                  markerWidth="8"
-                  markerHeight="8"
-                  refX="8"
-                  refY="4"
-                  orient="auto"
-                  markerUnits="strokeWidth"
-                >
-                  <path d="M0,0 L8,4 L0,8 Z" fill="#f59e42" />
-                </marker>
-              </defs>
-            </svg>
+                    );
+                  }
+                  return null;
+                })}
+                {/* Milestone markers */}
+                {rows.map(
+                  (row, i) =>
+                    row.type === "milestone" &&
+                    row.milestone.dueDate && (
+                      <g key={"ms-" + i}>
+                        {/* Diamond shape for milestone */}
+                        <polygon
+                          points={(() => {
+                            const cx = dateToX(row.milestone.dueDate, minDate, maxDate, chartWidth);
+                            const cy = i * rowHeight + rowHeight / 2;
+                            const size = 12;
+                            return [
+                              `${cx},${cy - size / 2}`,
+                              `${cx + size / 2},${cy}`,
+                              `${cx},${cy + size / 2}`,
+                              `${cx - size / 2},${cy}`
+                            ].join(" ");
+                          })()}
+                          fill="#0ea5e9"
+                          stroke="#0369a1"
+                          strokeWidth={1}
+                        />
+                      </g>
+                    )
+                )}
+                {/* Operation bars */}
+                {rows.map(
+                  (row, i) =>
+                    row.type === "operation" &&
+                    row.operation.startDate &&
+                    row.operation.endDate && (
+                      <g key={"op-" + i}>
+                        <rect
+                          x={dateToX(row.operation.startDate, minDate, maxDate, chartWidth)}
+                          y={i * rowHeight + 8}
+                          width={
+                            dateToX(row.operation.endDate, minDate, maxDate, chartWidth) -
+                            dateToX(row.operation.startDate, minDate, maxDate, chartWidth)
+                          }
+                          height={rowHeight - 16}
+                          fill="#38bdf8"
+                          stroke="#0ea5e9"
+                          strokeWidth={1}
+                          rx={4}
+                        />
+                      </g>
+                    )
+                )}
+                {/* Dependency arrows */}
+                {rows.flatMap((row, i) => {
+                  if (row.type !== "operation") return [];
+                  const successorIdx = i;
+                  const successorOp = row.operation;
+                  const successorX = dateToX(successorOp.startDate, minDate, maxDate, chartWidth);
+                  const successorY = successorIdx * rowHeight + rowHeight / 2;
+                  return successorOp.dependencies.map((predecessorId) => {
+                    const predecessorIdx = opIdToRowIdx[predecessorId];
+                    if (predecessorIdx === undefined) return null;
+                    const predecessorRow = rows[predecessorIdx] as typeof row;
+                    const predecessorOp = predecessorRow.operation;
+                    const predecessorX = dateToX(predecessorOp.endDate, minDate, maxDate, chartWidth);
+                    const predecessorY = predecessorIdx * rowHeight + rowHeight / 2;
+                    // Draw a rectangular arrow: from predecessor's bar end to successor's bar start
+                    const midX = Math.max(predecessorX, successorX) + 24;
+                    return (
+                      <g key={`dep-${predecessorOp.id}-${successorOp.id}`}>
+                        <polyline
+                          points={`
+                            ${predecessorX},${predecessorY}
+                            ${midX},${predecessorY}
+                            ${midX},${successorY}
+                            ${successorX},${successorY}
+                          `}
+                          fill="none"
+                          stroke="#f59e42"
+                          strokeWidth={2}
+                          markerEnd="url(#arrowhead)"
+                        />
+                      </g>
+                    );
+                  });
+                })}
+                {/* Arrowhead marker */}
+                <defs>
+                  <marker
+                    id="arrowhead"
+                    markerWidth="8"
+                    markerHeight="8"
+                    refX="8"
+                    refY="4"
+                    orient="auto"
+                    markerUnits="strokeWidth"
+                  >
+                    <path d="M0,0 L8,4 L0,8 Z" fill="#f59e42" />
+                  </marker>
+                </defs>
+              </svg>
+            </div>
           </div>
         </div>
       </CardContent>

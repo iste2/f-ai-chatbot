@@ -5,7 +5,7 @@ import path from "node:path";
 
 export const ganttViewerTool = createTool({
     id: 'gantt-viewer-tool',
-    description: 'A tool to fetch project, network, milestone, and operation data as a tree for Gantt chart display, including assigned employees for each operation.',
+    description: 'A tool to fetch project, network, milestone, and operation data as a tree for Gantt chart display, including assigned employees for each operation. Passing a single item will lead to its whole project beeing returned, while passing multiple items will return all projects containing those items.',
     inputSchema: z.object({
         projectIds: z.array(z.number()).describe('Array of project IDs to include'),
         networkIds: z.array(z.number()).describe('Array of network IDs to include'),
