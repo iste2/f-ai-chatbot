@@ -57,7 +57,7 @@ export const ganttViewerTool = createTool({
             }
             // Fetch employees for all operations (with assigned capacity)
             const opIds = operations.map(op => op.id);
-            let employeesByOp: Record<number, { id: number, name: string, assignedCapacity: number }[]> = {};
+            const employeesByOp: Record<number, { id: number, name: string, assignedCapacity: number }[]> = {};
             if (opIds.length > 0) {
                 const rows = db.prepare(`
                     SELECT oa.operation_id as opId, e.id as id, e.name as name, SUM(oa.assigned_capacity) as assignedCapacity
@@ -72,7 +72,7 @@ export const ganttViewerTool = createTool({
                 }
             }
             // Fetch dependencies for all operations
-            let dependenciesByOp: Record<number, number[]> = {};
+            const dependenciesByOp: Record<number, number[]> = {};
             if (opIds.length > 0) {
                 const depRows = db.prepare(`
                     SELECT operation_id, depends_on_operation_id

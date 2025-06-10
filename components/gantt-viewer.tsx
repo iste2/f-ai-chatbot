@@ -115,7 +115,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
 
   // Build rows: each row is { type, label, ... } and only visible if parent is expanded
   // Extend row types to include color
-  let rows: Array<
+  const rows: Array<
     | { type: "project"; label: string; y: number; timeline: { start: string | null; end: string | null }; id: number; color: string }
     | { type: "milestone"; label: string; y: number; milestone: Milestone; timeline: { start: string | null; end: string | null }; projectId: number; color: string }
     | { type: "network"; label: string; y: number; timeline: { start: string | null; end: string | null }; id: number; projectId: number; color: string }
@@ -167,7 +167,17 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
             <div style={{ width: labelWidth, display: "flex", flexDirection: "column", marginTop: 40, paddingRight: 16 }}>
               {rows.map((row, i) => (
                 <div
-                  key={i}
+                  key={
+                    row.type === "project"
+                      ? `project-${row.id}`
+                      : row.type === "network"
+                      ? `network-${row.id}`
+                      : row.type === "milestone"
+                      ? `milestone-${row.projectId}-${row.milestone.id}`
+                      : row.type === "operation"
+                      ? `operation-${row.projectId}-${row.networkId}-${row.operation.id}`
+                      : `row-${i}`
+                  }
                   style={{
                     height: rowHeight,
                     lineHeight: `${rowHeight}px`,
@@ -201,10 +211,21 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                     padding: 0,
                     margin: 0,
                   }}
-                  onClick={() => {
-                    if (row.type === "project") toggleProject(row.id);
-                    if (row.type === "network") toggleNetwork(row.id);
-                  }}
+                  {...((row.type === "project" || row.type === "network") && {
+                    onClick: () => {
+                      if (row.type === "project") toggleProject(row.id);
+                      if (row.type === "network") toggleNetwork(row.id);
+                    },
+                    onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        if (row.type === "project") toggleProject(row.id);
+                        if (row.type === "network") toggleNetwork(row.id);
+                      }
+                    },
+                    role: "button",
+                    tabIndex: 0,
+                  })}
                 >
                   {row.type === "project" && (
                     <span style={{ marginRight: 8, display: "inline-block", width: 16 }}>
@@ -253,7 +274,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                     return (
                       <g>
                         {ticks.map((d, i) => (
-                          <g key={i}>
+                          <g key={d.toISOString()}>
                             <line
                               x1={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
                               y1={0}
@@ -281,7 +302,17 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                   {/* Grid lines */}
                   {rows.map((row, i) => (
                     <rect
-                      key={i}
+                      key={
+                        row.type === "project"
+                          ? `project-${row.id}`
+                          : row.type === "network"
+                          ? `network-${row.id}`
+                          : row.type === "milestone"
+                          ? `milestone-${row.projectId}-${row.milestone.id}`
+                          : row.type === "operation"
+                          ? `operation-${row.projectId}-${row.networkId}-${row.operation.id}`
+                          : `row-${i}`
+                      }
                       x={0}
                       y={i * rowHeight}
                       width={chartWidth}
@@ -292,7 +323,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                   {/* Timeline bars for project, network, milestone */}
                   {rows.map((row, i) => {
                     if (
-                      (row.type === "project" || row.type === "network" || row.type === "milestone") &&
+                      (row.type === "project" || row.type === "network") &&
                       row.timeline.start &&
                       row.timeline.end
                     ) {
@@ -305,7 +336,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                           : "#a21caf");
                       return (
                         <rect
-                          key={row.label + "-timeline"}
+                          key={`${row.label}-timeline`}
                           x={x}
                           y={i * rowHeight + 4}
                           width={x2 - x}
@@ -323,7 +354,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                     (row, i) =>
                       row.type === "milestone" &&
                       row.milestone.dueDate && (
-                        <g key={"ms-" + i}>
+                        <g key={`ms-${row.projectId}-${row.milestone.id}`}>
                           {/* Diamond shape for milestone */}
                           <polygon
                             points={(() => {
@@ -350,7 +381,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                       row.type === "operation" &&
                       row.operation.startDate &&
                       row.operation.endDate && (
-                        <g key={"op-" + i}>
+                        <g key={`op-${row.projectId}-${row.networkId}-${row.operation.id}`}>
                           <rect
                             x={dateToX(row.operation.startDate, minDate, maxDate, chartWidth)}
                             y={i * rowHeight + 8}
