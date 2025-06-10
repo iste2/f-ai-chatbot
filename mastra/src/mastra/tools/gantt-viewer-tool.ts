@@ -16,6 +16,7 @@ export const ganttViewerTool = createTool({
         projects: z.array(z.object({
             id: z.number(),
             name: z.string(),
+            colorCode: z.string(),
             milestones: z.array(z.object({
                 id: z.number(),
                 name: z.string(),
@@ -46,7 +47,7 @@ export const ganttViewerTool = createTool({
         const db = new Database(dbPath, { readonly: true });
         try {
             // Fetch projects
-            const projects = db.prepare(`SELECT id, name FROM project WHERE id IN (${projectIds.map(() => '?').join(',')})`).all(...projectIds);
+            const projects = db.prepare(`SELECT id, name, color_code FROM project WHERE id IN (${projectIds.map(() => '?').join(',')})`).all(...projectIds);
             // Fetch networks
             const networks = db.prepare(`SELECT id, name, project_id FROM network WHERE id IN (${networkIds.map(() => '?').join(',')})`).all(...networkIds);
             // Fetch milestones
@@ -83,12 +84,13 @@ export const ganttViewerTool = createTool({
                 }
             }
             // Build tree
-            const projectTree = (projects as Array<{id: number, name: string}>).map(proj => {
+            const projectTree = (projects as Array<{id: number, name: string, color_code: string}>).map(proj => {
                 const projMilestones = (milestones as Array<{id: number, name: string, due_date: string|null, project_id: number}>).filter(ms => ms.project_id === proj.id);
                 const projNetworks = (networks as Array<{id: number, name: string, project_id: number}>).filter(nw => nw.project_id === proj.id);
                 return {
                     id: proj.id,
                     name: proj.name,
+                    colorCode: proj.color_code,
                     milestones: projMilestones.map(ms => ({
                         id: ms.id,
                         name: ms.name,

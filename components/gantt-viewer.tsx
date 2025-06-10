@@ -35,6 +35,7 @@ export type Milestone = {
 export type Project = {
   id: number;
   name: string;
+  colorCode: string;
   milestones: Milestone[];
   networks: Network[];
 };
@@ -123,22 +124,22 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
   for (const project of projects) {
     const projectOps = project.networks.flatMap((n) => n.operations);
     const projectTimeline = getTimeline(projectOps);
-    rows.push({ type: "project", label: project.name, y, timeline: projectTimeline, id: project.id });
+    rows.push({ type: "project", label: project.name, y, timeline: projectTimeline, id: project.id, color: project.colorCode });
     y += rowHeight;
     if (expandedProjects[project.id]) {
       for (const ms of project.milestones) {
         const msOps = project.networks.flatMap((n) => n.operations);
         const msTimeline = getTimeline(msOps);
-        rows.push({ type: "milestone", label: ms.name, y, milestone: ms, timeline: msTimeline, projectId: project.id });
+        rows.push({ type: "milestone", label: ms.name, y, milestone: ms, timeline: msTimeline, projectId: project.id, color: project.colorCode });
         y += rowHeight;
       }
       for (const network of project.networks) {
         const nwTimeline = getTimeline(network.operations);
-        rows.push({ type: "network", label: network.name, y, timeline: nwTimeline, id: network.id, projectId: project.id });
+        rows.push({ type: "network", label: network.name, y, timeline: nwTimeline, id: network.id, projectId: project.id, color: project.colorCode });
         y += rowHeight;
         if (expandedNetworks[network.id]) {
           for (const op of network.operations) {
-            rows.push({ type: "operation", label: op.name, y, operation: op, networkId: network.id, projectId: project.id });
+            rows.push({ type: "operation", label: op.name, y, operation: op, networkId: network.id, projectId: project.id, color: project.colorCode });
             y += rowHeight;
           }
         }
@@ -288,12 +289,11 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                   ) {
                     const x = dateToX(row.timeline.start, minDate, maxDate, chartWidth);
                     const x2 = dateToX(row.timeline.end, minDate, maxDate, chartWidth);
-                    const color =
-                      row.type === "project"
+                    const color = row.color || (row.type === "project"
                         ? "#0ea5e9"
                         : row.type === "network"
                         ? "#38bdf8"
-                        : "#a21caf";
+                        : "#a21caf");
                     return (
                       <rect
                         key={row.label + "-timeline"}
@@ -350,8 +350,8 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                             dateToX(row.operation.startDate, minDate, maxDate, chartWidth)
                           }
                           height={rowHeight - 16}
-                          fill="#38bdf8"
-                          stroke="#0ea5e9"
+                          fill={row.color || "#38bdf8"}
+                          stroke={row.color || "#0ea5e9"}
                           strokeWidth={1}
                           rx={4}
                         />
