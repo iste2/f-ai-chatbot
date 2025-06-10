@@ -212,6 +212,10 @@ const PurePreviewMessage = ({
                           result={result}
                           isReadonly={isReadonly}
                         />
+                      ) : toolName === 'randomTool' ? (
+                        <div className='flex flex-col items-center justify-center' style={{ background: result["color"]}}>
+                          <h1>{result["number"]}</h1>
+                        </div>
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}

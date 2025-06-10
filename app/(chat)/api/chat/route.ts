@@ -103,8 +103,8 @@ export async function POST(request: Request) {
 
     const stream = createDataStream({
       execute: async (dataStream) => {
-        const agentNetwork = mastra.getNetwork('agent-network');
-        const result = await agentNetwork!.stream(
+        const agent = mastra.getAgent('randomAgent');
+        const result = await agent!.stream(
           messages.map((message) => JSON.stringify(message)),
           {
             experimental_transform: smoothStream({ chunking: 'word' }),
