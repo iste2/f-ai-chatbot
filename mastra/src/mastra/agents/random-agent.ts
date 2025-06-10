@@ -5,10 +5,10 @@ import { databaseSchemaDescriptionTool, sqlTool } from "../tools/sql-tool";
 import { shiftViewerTool } from "../tools/shift-viewer-tool";
 import { ganttViewerTool } from "../tools/gantt-viewer-tool";
 
-export const randomAgent = new Agent({
-  name: "randomAgent",
-  description: "An agent that returns a random number between 1 and 100.",
-  instructions: "You return a random number between 1 and 100.",
+export const feliosAgent = new Agent({
+  name: "feliosAgent",
+  description: "An agent that provides information about the Felios project.",
+  instructions: "You are a helpful assistant for the Felios project planning software. You can answer questions about the project, its database schema, and provide insights into project management tasks.",
   model: anthropic("claude-3-5-haiku-latest"),
   tools: { 
     randomTool: randomTool, 
