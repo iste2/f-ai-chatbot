@@ -5,12 +5,9 @@ import path from "node:path";
 
 export const ganttViewerTool = createTool({
     id: 'gantt-viewer-tool',
-    description: 'A tool to fetch project, network, milestone, and operation data as a tree for Gantt chart display, including assigned employees for each operation. Passing a single item will lead to its whole project beeing returned, while passing multiple items will return all projects containing those items.',
+    description: 'A tool to fetch project, network, milestone, and operation data as a tree for Gantt chart display, including assigned employees for each operation. Input is a list of project IDs; the full project tree is returned for each.',
     inputSchema: z.object({
         projectIds: z.array(z.number()).describe('Array of project IDs to include'),
-        networkIds: z.array(z.number()).describe('Array of network IDs to include'),
-        milestoneIds: z.array(z.number()).describe('Array of milestone IDs to include'),
-        operationIds: z.array(z.number()).describe('Array of operation IDs to include'),
     }),
     outputSchema: z.object({
         projects: z.array(z.object({
@@ -42,20 +39,24 @@ export const ganttViewerTool = createTool({
             })),
         })),
     }),
-    execute: async ({ context: { projectIds, networkIds, milestoneIds, operationIds } }) => {
+    execute: async ({ context: { projectIds } }) => {
         const dbPath = path.join(process.cwd(), 'lib', 'db', 'felios-data', 'felios.db');
         const db = new Database(dbPath, { readonly: true });
         try {
             // Fetch projects
             const projects = db.prepare(`SELECT id, name, color_code FROM project WHERE id IN (${projectIds.map(() => '?').join(',')})`).all(...projectIds);
-            // Fetch networks
-            const networks = db.prepare(`SELECT id, name, project_id FROM network WHERE id IN (${networkIds.map(() => '?').join(',')})`).all(...networkIds);
-            // Fetch milestones
-            const milestones = db.prepare(`SELECT id, name, due_date, project_id FROM milestone WHERE id IN (${milestoneIds.map(() => '?').join(',')})`).all(...milestoneIds);
-            // Fetch operations
-            const operations = db.prepare(`SELECT id, name, start_date, end_date, time_capacity_demand, resource_id, network_id FROM operation WHERE id IN (${operationIds.map(() => '?').join(',')})`).all(...operationIds);
+            // Fetch networks for all projects
+            const networks = db.prepare(`SELECT id, name, project_id FROM network WHERE project_id IN (${projectIds.map(() => '?').join(',')})`).all(...projectIds);
+            // Fetch milestones for all projects
+            const milestones = db.prepare(`SELECT id, name, due_date, project_id FROM milestone WHERE project_id IN (${projectIds.map(() => '?').join(',')})`).all(...projectIds);
+            // Fetch operations for all networks
+            const networkIds = networks.map((nw: {id: number}) => nw.id);
+            let operations: any[] = [];
+            if (networkIds.length > 0) {
+                operations = db.prepare(`SELECT id, name, start_date, end_date, time_capacity_demand, resource_id, network_id FROM operation WHERE network_id IN (${networkIds.map(() => '?').join(',')})`).all(...networkIds);
+            }
             // Fetch employees for all operations (with assigned capacity)
-            const opIds = (operations as Array<{id: number}>).map(op => op.id);
+            const opIds = operations.map(op => op.id);
             let employeesByOp: Record<number, { id: number, name: string, assignedCapacity: number }[]> = {};
             if (opIds.length > 0) {
                 const rows = db.prepare(`
