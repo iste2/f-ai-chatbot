@@ -103,14 +103,22 @@ export const sqlTool = createTool({
     }),
     execute: async ({ context: { query } }) => {
         // Only select queries are allowed for security reasons
+        let result : any;
+        let valid = true;
+
         if (!query.trim().toLowerCase().startsWith('select')) {
-            throw new Error('Only SELECT queries are allowed for security reasons.');
+            result = 'Only SELECT queries are allowed for security reasons.';
+            valid = false;
+            return {
+                query: query.trim(),
+                result: JSON.stringify(result),
+                valid,
+            };
         }
         // Get the result of the query from felios project database, query the database directly
         const dbPath = path.join(process.cwd(), 'lib', 'db', 'felios-data', 'felios.db');
         const db = new Database(dbPath, { readonly: true });
-        let result : any;
-        let valid = true;
+        
         try {
             
             const stmt = db.prepare(query);

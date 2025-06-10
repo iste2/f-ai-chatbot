@@ -22,6 +22,7 @@ import type { UseChatHelpers } from '@ai-sdk/react';
 import SqlViewer from './sql-viewer';
 import ArtifactDocumentation from './artifact-documentation';
 import ShiftViewer from './shift-viewer';
+import GanttViewer from './gantt-viewer';
 
 const PurePreviewMessage = ({
   chatId,
@@ -220,14 +221,12 @@ const PurePreviewMessage = ({
                         <ArtifactDocumentation
                           documentation={result.description}
                         />
-                      ) : toolName === 'randomTool' ? (
-                        <div className='flex flex-col items-center justify-center' style={{ background: result.color}}>
-                          <h1>{result.number}</h1>
-                        </div>
                       ) : toolName === 'sqlTool' ? (
                         <SqlViewer initialQuery={result.query} valid={result.valid} />
                       ) : toolName === 'shiftViewerTool' ? (
                         <ShiftViewer shifts={result.shifts} />
+                      ) : toolName === 'ganttViewerTool' ? (
+                        <GanttViewer projects={result.projects} />
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
