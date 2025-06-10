@@ -256,13 +256,9 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                 </div>
               ))}
             </div>
-            {/* Chart SVG with always-visible horizontal scrollbar */}
+            {/* Chart SVG without horizontal scroll */}
             <div style={{ flex: 1, minWidth: chartWidth, position: 'relative' }}>
-              <div style={{ width: '100%', overflowX: 'scroll', overflowY: 'hidden', position: 'absolute', bottom: 0, left: 0, right: 0, height: 24, zIndex: 2, pointerEvents: 'auto', background: 'transparent' }}>
-                {/* This empty div forces the scrollbar to always be visible */}
-                <div style={{ width: chartWidth, height: 1 }} />
-              </div>
-              <div style={{ overflowX: 'auto', overflowY: 'visible', height: chartHeight + 40, position: 'relative', zIndex: 1 }}>
+              <div style={{ height: chartHeight + 40, position: 'relative', zIndex: 1 }}>
                 {/* Timeline axis */}
                 <svg width={chartWidth} height={40} style={{ background: "#f8fafc" }}>
                   {/* Draw time axis ticks and labels */}
