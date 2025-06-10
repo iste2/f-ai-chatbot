@@ -36,6 +36,7 @@ export const ganttViewerTool = createTool({
                         name: z.string(),
                         assignedCapacity: z.number(),
                     })),
+                    dependencies: z.array(z.number()),
                 })),
             })),
         })),
@@ -68,6 +69,19 @@ export const ganttViewerTool = createTool({
                     employeesByOp[row.opId].push({ id: row.id, name: row.name, assignedCapacity: row.assignedCapacity });
                 }
             }
+            // Fetch dependencies for all operations
+            let dependenciesByOp: Record<number, number[]> = {};
+            if (opIds.length > 0) {
+                const depRows = db.prepare(`
+                    SELECT operation_id, depends_on_operation_id
+                    FROM operation_dependency
+                    WHERE operation_id IN (${opIds.map(() => '?').join(',')})
+                `).all(...opIds) as Array<{operation_id: number, depends_on_operation_id: number}>;
+                for (const row of depRows) {
+                    if (!dependenciesByOp[row.operation_id]) dependenciesByOp[row.operation_id] = [];
+                    dependenciesByOp[row.operation_id].push(row.depends_on_operation_id);
+                }
+            }
             // Build tree
             const projectTree = (projects as Array<{id: number, name: string}>).map(proj => {
                 const projMilestones = (milestones as Array<{id: number, name: string, due_date: string|null, project_id: number}>).filter(ms => ms.project_id === proj.id);
@@ -93,6 +107,7 @@ export const ganttViewerTool = createTool({
                                 timeCapacityDemand: op.time_capacity_demand,
                                 resourceId: op.resource_id,
                                 employees: employeesByOp[op.id] || [],
+                                dependencies: dependenciesByOp[op.id] || [],
                             })),
                         };
                     }),
