@@ -50,7 +50,7 @@ export const ganttViewerTool = createTool({
             // Fetch milestones for all projects
             const milestones = db.prepare(`SELECT id, name, due_date, project_id FROM milestone WHERE project_id IN (${projectIds.map(() => '?').join(',')})`).all(...projectIds);
             // Fetch operations for all networks
-            const networkIds = networks.map((nw: {id: number}) => nw.id);
+            const networkIds = (networks as Array<{id: number}>).map(nw => nw.id);
             let operations: any[] = [];
             if (networkIds.length > 0) {
                 operations = db.prepare(`SELECT id, name, start_date, end_date, time_capacity_demand, resource_id, network_id FROM operation WHERE network_id IN (${networkIds.map(() => '?').join(',')})`).all(...networkIds);
