@@ -3,6 +3,7 @@ import { Agent } from "@mastra/core";
 import { randomTool } from "../tools/random-tool";
 import { databaseSchemaDescriptionTool, sqlTool } from "../tools/sql-tool";
 import { shiftViewerTool } from "../tools/shift-viewer-tool";
+import { ganttViewerTool } from "../tools/gantt-viewer-tool";
 
 export const randomAgent = new Agent({
   name: "randomAgent",
@@ -14,5 +15,6 @@ export const randomAgent = new Agent({
     databaseSchemaDescriptionTool: databaseSchemaDescriptionTool, 
     sqlTool: sqlTool,
     shiftViewerTool: shiftViewerTool,
+    ganttViewerTool: ganttViewerTool,
  },
 });

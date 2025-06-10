@@ -22,6 +22,7 @@ import type { UseChatHelpers } from '@ai-sdk/react';
 import SqlViewer from './sql-viewer';
 import ArtifactDocumentation from './artifact-documentation';
 import ShiftViewer from './shift-viewer';
+import GanttViewer from './gantt-viewer';
 
 const PurePreviewMessage = ({
   chatId,
@@ -228,6 +229,8 @@ const PurePreviewMessage = ({
                         <SqlViewer initialQuery={result.query} valid={result.valid} />
                       ) : toolName === 'shiftViewerTool' ? (
                         <ShiftViewer shifts={result.shifts} />
+                      ) : toolName === 'ganttViewerTool' ? (
+                        <GanttViewer projects={result.projects} />
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
