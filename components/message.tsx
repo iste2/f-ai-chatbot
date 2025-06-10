@@ -21,6 +21,7 @@ import { MessageReasoning } from './message-reasoning';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import SqlViewer from './sql-viewer';
 import ArtifactDocumentation from './artifact-documentation';
+import ShiftViewer from './shift-viewer';
 
 const PurePreviewMessage = ({
   chatId,
@@ -192,6 +193,7 @@ const PurePreviewMessage = ({
 
                 if (state === 'result') {
                   const { result } = toolInvocation;
+                  console.log(toolName);
 
                   return (
                     <div key={toolCallId}>
@@ -224,6 +226,8 @@ const PurePreviewMessage = ({
                         </div>
                       ) : toolName === 'sqlTool' ? (
                         <SqlViewer initialQuery={result.query} valid={result.valid} />
+                      ) : toolName === 'shiftViewerTool' ? (
+                        <ShiftViewer shifts={result.shifts} />
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
