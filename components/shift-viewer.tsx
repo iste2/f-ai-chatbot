@@ -51,16 +51,16 @@ export const ShiftViewer: React.FC<ShiftViewerProps> = ({ shifts }) => {
         <table className="min-w-full border-collapse">
           <thead>
             <tr>
-              <th className="px-2 py-1 bg-gray-100 sticky top-0 left-0 z-30" style={{ background: '#F3F4F6' }}>Employee</th>
+              <th className="px-2 py-1 bg-gray-100 sticky top-0 left-0 z-30 dark:bg-gray-800" style={{ background: undefined }}>Employee</th>
               {dates.map((date) => (
-                <th key={date} className="px-2 py-1 bg-gray-100 text-xs sticky top-0 z-20">{date}</th>
+                <th key={date} className="px-2 py-1 bg-gray-100 text-xs sticky top-0 z-20 dark:bg-gray-800">{date}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {employees.map((emp) => (
               <tr key={emp.employeeId}>
-                <td className="px-2 py-1 font-medium bg-gray-50 sticky left-0 z-10" style={{ background: '#F9FAFB' }}>{emp.employeeName}</td>
+                <td className="px-2 py-1 font-medium bg-gray-50 sticky left-0 z-10 dark:bg-gray-900" style={{ background: undefined }}>{emp.employeeName}</td>
                 {dates.map((date) => {
                   const shift = shiftLookup[emp.employeeId]?.[date];
                   return (

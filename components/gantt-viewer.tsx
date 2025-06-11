@@ -161,7 +161,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
         <CardTitle>Gantt Chart</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-auto max-h-96 border rounded bg-muted" style={{ overflowY: 'auto', position: 'relative', paddingBottom: 24 }}>
+        <div className="overflow-auto max-h-96 border rounded bg-muted dark:bg-gray-900" style={{ overflowY: 'auto', position: 'relative', paddingBottom: 24 }}>
           <div style={{ display: "flex", flexDirection: "row" }}>
             {/* Labels */}
             <div style={{ width: labelWidth, display: "flex", flexDirection: "column", marginTop: 40, paddingRight: 16 }}>
@@ -195,7 +195,9 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                         ? 500
                         : 400,
                     color:
-                      row.type === "project"
+                      typeof window !== 'undefined' && document.documentElement.classList.contains('dark')
+                        ? undefined
+                        : row.type === "project"
                         ? "#1e293b"
                         : row.type === "network"
                         ? "#334155"
@@ -211,6 +213,16 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                     padding: 0,
                     margin: 0,
                   }}
+                  className={
+                    `transition-colors ` +
+                    (row.type === "project"
+                      ? "dark:text-white dark:font-extrabold"
+                      : row.type === "network"
+                      ? "dark:text-white dark:font-extrabold"
+                      : row.type === "milestone"
+                      ? "dark:text-cyan-50"
+                      : "dark:text-white")
+                  }
                   {...((row.type === "project" || row.type === "network") && {
                     onClick: () => {
                       if (row.type === "project") toggleProject(row.id);
@@ -240,7 +252,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                   {row.type !== "project" && row.type !== "network" && <span style={{ width: 24 }} />}
                   {row.label}
                   {row.type === "operation" && row.operation.employees.length > 0 && (
-                    <span style={{ fontSize: 12, marginLeft: 8, color: "#64748b" }}>
+                    <span style={{ fontSize: 12, marginLeft: 8 }} className="dark:text-gray-200">
                       [
                       {row.operation.employees
                         .map((e) => `${e.name} (${e.assignedCapacity})`)
@@ -249,7 +261,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                     </span>
                   )}
                   {row.type === "milestone" && row.milestone.dueDate && (
-                    <span style={{ fontSize: 12, marginLeft: 8, color: "#0e7490" }}>
+                    <span style={{ fontSize: 12, marginLeft: 8 }} className="dark:text-cyan-100">
                       ({row.milestone.dueDate})
                     </span>
                   )}
@@ -260,13 +272,17 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
             <div style={{ flex: 1, minWidth: chartWidth, position: 'relative' }}>
               <div style={{ height: chartHeight + 40, position: 'relative', zIndex: 1 }}>
                 {/* Timeline axis */}
-                <svg width={chartWidth} height={40} style={{ background: "#f8fafc" }}>
+                <svg width={chartWidth} height={40} className="bg-[#f8fafc] dark:bg-gray-800">
                   {/* Draw time axis ticks and labels */}
                   {(() => {
                     const nTicks = 8;
                     const ticks = Array.from({ length: nTicks + 1 }, (_, i) =>
                       new Date(minDate.getTime() + ((maxDate.getTime() - minDate.getTime()) * i) / nTicks)
                     );
+                    // Use CSS variable for dark mode stroke
+                    const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
+                    const axisStroke = isDark ? '#334155' : '#cbd5e1';
+                    const axisText = isDark ? '#fff' : '#334155';
                     return (
                       <g>
                         {ticks.map((d, i) => (
@@ -276,15 +292,16 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                               y1={0}
                               x2={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
                               y2={40}
-                              stroke="#cbd5e1"
+                              stroke={axisStroke}
                               strokeDasharray="2 2"
                             />
                             <text
                               x={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
                               y={32}
-                              fontSize={12}
+                              fontSize={13}
                               textAnchor="middle"
-                              fill="#334155"
+                              fill={axisText}
+                              fontWeight={isDark ? 700 : 500}
                             >
                               {d.toISOString().slice(0, 10)}
                             </text>
@@ -294,7 +311,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                     );
                   })()}
                 </svg>
-                <svg width={chartWidth} height={chartHeight} style={{ background: "#f8fafc" }}>
+                <svg width={chartWidth} height={chartHeight} className="bg-[#f8fafc] dark:bg-gray-800">
                   {/* Grid lines */}
                   {rows.map((row, i) => (
                     <rect
@@ -314,6 +331,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                       width={chartWidth}
                       height={rowHeight}
                       fill={i % 2 === 0 ? "#f1f5f9" : "#e2e8f0"}
+                      className={i % 2 === 0 ? "dark:fill-gray-900" : "dark:fill-gray-800"}
                     />
                   ))}
                   {/* Timeline bars for project, network, milestone */}
@@ -330,6 +348,8 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                           : row.type === "network"
                           ? "#38bdf8"
                           : "#a21caf");
+                      // Use lower opacity in dark mode
+                      const barOpacity = typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? 0.28 : 0.18;
                       return (
                         <rect
                           key={`${row.label}-timeline`}
@@ -338,7 +358,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                           width={x2 - x}
                           height={rowHeight - 8}
                           fill={color}
-                          opacity={0.18}
+                          opacity={barOpacity}
                           rx={4}
                         />
                       );
@@ -367,6 +387,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                             fill="#0ea5e9"
                             stroke="#0369a1"
                             strokeWidth={1}
+                            className="dark:fill-cyan-400 dark:stroke-cyan-700"
                           />
                         </g>
                       )
@@ -390,6 +411,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                             stroke={row.color || "#0ea5e9"}
                             strokeWidth={1}
                             rx={4}
+                            className="dark:fill-sky-700 dark:stroke-sky-400"
                           />
                         </g>
                       )
@@ -411,7 +433,8 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                       // Start at the end of the predecessor bar
                       const predecessorX = dateToX(predecessorOp.endDate, minDate, maxDate, chartWidth);
                       const predecessorY = predecessorIdx * rowHeight + rowHeight / 2;
-                      // End at the start of the successor bar
+                      // Start with orange, use lighter orange in dark mode
+                      const arrowStroke = typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fbbf24' : '#f59e42';
                       // Draw a polyline: horizontal from predecessorX to a midX, vertical to successorY, then horizontal to successorX
                       const midX = Math.min(predecessorX + 24, successorX - 12); // 24px horizontal, but don't overshoot
                       const points = [
@@ -425,8 +448,9 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                           <polyline
                             points={points}
                             fill="none"
-                            stroke="#f59e42"
+                            stroke={arrowStroke}
                             strokeWidth={2}
+                            className="dark:stroke-amber-400"
                           />
                         </g>
                       );
