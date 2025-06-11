@@ -251,15 +251,6 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                   )}
                   {row.type !== "project" && row.type !== "network" && <span style={{ width: 24 }} />}
                   {row.label}
-                  {row.type === "operation" && row.operation.employees.length > 0 && (
-                    <span style={{ fontSize: 12, marginLeft: 8 }} className="dark:text-gray-200">
-                      [
-                      {row.operation.employees
-                        .map((e) => `${e.name} (${e.assignedCapacity})`)
-                        .join(", ")}
-                      ]
-                    </span>
-                  )}
                   {row.type === "milestone" && row.milestone.dueDate && (
                     <span style={{ fontSize: 12, marginLeft: 8 }} className="dark:text-cyan-100">
                       ({row.milestone.dueDate})
