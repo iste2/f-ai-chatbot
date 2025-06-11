@@ -23,6 +23,7 @@ import SqlViewer from './sql-viewer';
 import ArtifactDocumentation from './artifact-documentation';
 import ShiftViewer from './shift-viewer';
 import GanttViewer from './gantt-viewer';
+import AssignmentViewer from './assignment-viewer';
 
 const PurePreviewMessage = ({
   chatId,
@@ -227,6 +228,8 @@ const PurePreviewMessage = ({
                         <ShiftViewer shifts={result.shifts} />
                       ) : toolName === 'ganttViewerTool' ? (
                         <GanttViewer projects={result.projects} />
+                      ) : toolName === 'assignmentViewerTool' ? (
+                        <AssignmentViewer assignments={result.assignments} />
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
