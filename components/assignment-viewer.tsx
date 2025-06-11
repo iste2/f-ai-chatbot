@@ -95,7 +95,7 @@ const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
             <thead>
               <tr>
                 <th className="px-4 py-1 border min-w-[200px] whitespace-nowrap sticky bg-white dark:bg-gray-900 left-0 top-0 z-30 text-gray-900 dark:text-gray-100">Name</th>
-                <th className="px-4 py-1 border min-w-[120px] whitespace-nowrap sticky top-0 bg-white dark:bg-gray-900 z-20 text-gray-900 dark:text-gray-100">Hours</th>
+                <th className="px-4 py-1 border min-w-[120px] whitespace-nowrap sticky top-0 bg-white dark:bg-gray-900 z-20 text-gray-900 dark:text-gray-100">Assigned Hours</th>
                 {dateRange.map((date, idx) => (
                   <th key={date + '-' + idx} className="p-1 border text-xs sticky top-0 bg-white dark:bg-gray-900 z-10 text-gray-900 dark:text-gray-100">{date.slice(5)}</th>
                 ))}
