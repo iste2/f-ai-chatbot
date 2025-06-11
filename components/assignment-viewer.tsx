@@ -91,13 +91,13 @@ const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto max-h-96" style={{ maxHeight: '24rem' }}>
-          <table className="min-w-full border text-sm">
+          <table className="min-w-full border text-sm bg-white dark:bg-gray-900">
             <thead>
               <tr>
-                <th className="px-4 py-1 border min-w-[200px] whitespace-nowrap sticky bg-white left-0 top-0 z-30">Name</th>
-                <th className="px-4 py-1 border min-w-[120px] whitespace-nowrap sticky top-0 bg-white z-20">Hours</th>
+                <th className="px-4 py-1 border min-w-[200px] whitespace-nowrap sticky bg-white dark:bg-gray-900 left-0 top-0 z-30 text-gray-900 dark:text-gray-100">Name</th>
+                <th className="px-4 py-1 border min-w-[120px] whitespace-nowrap sticky top-0 bg-white dark:bg-gray-900 z-20 text-gray-900 dark:text-gray-100">Hours</th>
                 {dateRange.map((date, idx) => (
-                  <th key={date + '-' + idx} className="p-1 border text-xs sticky top-0 bg-white z-10">{date.slice(5)}</th>
+                  <th key={date + '-' + idx} className="p-1 border text-xs sticky top-0 bg-white dark:bg-gray-900 z-10 text-gray-900 dark:text-gray-100">{date.slice(5)}</th>
                 ))}
               </tr>
             </thead>
@@ -110,12 +110,12 @@ const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
                 return (
                   <React.Fragment key={opId}>
                     {/* Operation row */}
-                    <tr className="bg-gray-100 cursor-pointer" onClick={() => toggleExpand(opId)}>
-                      <td className="px-4 py-1 border font-semibold flex items-center gap-2 min-w-[200px] whitespace-nowrap bg-white sticky left-0 z-20">
+                    <tr className="bg-gray-100 dark:bg-gray-800 cursor-pointer" onClick={() => toggleExpand(opId)}>
+                      <td className="px-4 py-1 border font-semibold flex items-center gap-2 min-w-[200px] whitespace-nowrap bg-white dark:bg-gray-900 sticky left-0 z-20 text-gray-900 dark:text-gray-100">
                         <span className="inline-block size-3 rounded-full" style={{ background: op.operation_colorCode }} />
                         {op.operationName}
                       </td>
-                      <td className="px-4 py-1 border min-w-[120px] whitespace-nowrap">{totalAssigned} / {totalDemand}h</td>
+                      <td className="px-4 py-1 border min-w-[120px] whitespace-nowrap text-gray-900 dark:text-gray-100">{totalAssigned} / {totalDemand}h</td>
                       {dateRange.map((date, idx) => {
                         const inOp = date >= op.operation_startDate && date <= op.operation_endDate;
                         return (
@@ -131,9 +131,9 @@ const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
                     {expanded[opId] && Object.entries(op.employees).map(([empId, emp]) => {
                       const empTotal = emp.assignments.reduce((sum, a) => sum + a.duration, 0);
                       return (
-                        <tr key={empId} className="bg-white">
-                          <td className="px-2 py-1 border pl-8 bg-white sticky left-0 z-20">{emp.employeeName}</td>
-                          <td className="px-2 py-1 border">{empTotal}h</td>
+                        <tr key={empId} className="bg-white dark:bg-gray-900">
+                          <td className="px-2 py-1 border pl-8 bg-white dark:bg-gray-900 sticky left-0 z-20 text-gray-900 dark:text-gray-100">{emp.employeeName}</td>
+                          <td className="px-2 py-1 border text-gray-900 dark:text-gray-100">{empTotal}h</td>
                           {dateRange.map((date, idx) => {
                             const assignment = emp.assignments.find(a => a.date === date);
                             return (
