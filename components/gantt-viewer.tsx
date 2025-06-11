@@ -212,14 +212,13 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                     margin: 0,
                   }}
                   className={
-                    `transition-colors ` +
-                    (row.type === "project"
+                    `transition-colors ${row.type === "project"
                       ? "dark:text-white dark:font-extrabold"
                       : row.type === "network"
                       ? "dark:text-white dark:font-extrabold"
                       : row.type === "milestone"
                       ? "dark:text-cyan-50"
-                      : "dark:text-white")
+                      : "dark:text-white"}`
                   }
                   {...((row.type === "project" || row.type === "network") && {
                     onClick: () => {

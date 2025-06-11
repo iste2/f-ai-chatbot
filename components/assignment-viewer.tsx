@@ -22,7 +22,7 @@ export interface AssignmentViewerProps {
 // Helper to get all dates between two dates (inclusive)
 function getDateRange(start: string, end: string): string[] {
   const result: string[] = [];
-  let current = new Date(start);
+  const current = new Date(start);
   const last = new Date(end);
   while (current <= last) {
     result.push(current.toISOString().slice(0, 10));
@@ -96,8 +96,8 @@ const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
               <tr>
                 <th className="px-4 py-1 border min-w-[200px] whitespace-nowrap sticky bg-white dark:bg-gray-900 left-0 top-0 z-30 text-gray-900 dark:text-gray-100">Name</th>
                 <th className="px-4 py-1 border min-w-[120px] whitespace-nowrap sticky top-0 bg-white dark:bg-gray-900 z-20 text-gray-900 dark:text-gray-100">Assigned Hours</th>
-                {dateRange.map((date, idx) => (
-                  <th key={date + '-' + idx} className="p-1 border text-xs sticky top-0 bg-white dark:bg-gray-900 z-10 text-gray-900 dark:text-gray-100">{date.slice(5)}</th>
+                {dateRange.map((date) => (
+                  <th key={date} className="p-1 border text-xs sticky top-0 bg-white dark:bg-gray-900 z-10 text-gray-900 dark:text-gray-100">{date.slice(5)}</th>
                 ))}
               </tr>
             </thead>
@@ -116,10 +116,10 @@ const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
                         {op.operationName}
                       </td>
                       <td className="px-4 py-1 border min-w-[120px] whitespace-nowrap text-gray-900 dark:text-gray-100">{totalAssigned} / {totalDemand}h</td>
-                      {dateRange.map((date, idx) => {
+                      {dateRange.map((date) => {
                         const inOp = date >= op.operation_startDate && date <= op.operation_endDate;
                         return (
-                          <td key={date + '-' + idx} className="p-1 border">
+                          <td key={date} className="p-1 border">
                             {inOp && (
                               <div className="size-4 mx-auto rounded" style={{ background: op.operation_colorCode, opacity: 0.3 }} />
                             )}
@@ -134,10 +134,10 @@ const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
                         <tr key={empId} className="bg-white dark:bg-gray-900">
                           <td className="px-2 py-1 border pl-8 bg-white dark:bg-gray-900 sticky left-0 z-20 text-gray-900 dark:text-gray-100">{emp.employeeName}</td>
                           <td className="px-2 py-1 border text-gray-900 dark:text-gray-100">{empTotal}h</td>
-                          {dateRange.map((date, idx) => {
+                          {dateRange.map((date) => {
                             const assignment = emp.assignments.find(a => a.date === date);
                             return (
-                              <td key={date + '-' + idx} className="p-1 border">
+                              <td key={date} className="p-1 border">
                                 {assignment && (
                                   <div className="size-4 mx-auto rounded" style={{ background: op.operation_colorCode }} title={`${assignment.duration}h`} />
                                 )}
