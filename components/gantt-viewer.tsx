@@ -195,15 +195,13 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                         ? 500
                         : 400,
                     color:
-                      typeof window !== 'undefined' && document.documentElement.classList.contains('dark')
-                        ? undefined
-                        : row.type === "project"
-                        ? "#1e293b"
+                      row.type === "project"
+                        ? "var(--gantt-label-project, #1e293b)"
                         : row.type === "network"
-                        ? "#334155"
+                        ? "var(--gantt-label-network, #334155)"
                         : row.type === "milestone"
-                        ? "#0e7490"
-                        : undefined,
+                        ? "var(--gantt-label-milestone, #0e7490)"
+                        : "var(--gantt-label-default, inherit)",
                     cursor:
                       row.type === "project" || row.type === "network"
                         ? "pointer"
@@ -272,8 +270,8 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                     );
                     // Use CSS variable for dark mode stroke
                     const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
-                    const axisStroke = isDark ? '#334155' : '#cbd5e1';
-                    const axisText = isDark ? '#fff' : '#334155';
+                    const axisStroke = isDark ? 'var(--gantt-axis-stroke-dark, #334155)' : 'var(--gantt-axis-stroke, #cbd5e1)';
+                    const axisText = isDark ? 'var(--gantt-axis-text-dark, #fff)' : 'var(--gantt-axis-text, #334155)';
                     return (
                       <g>
                         {ticks.map((d, i) => (
@@ -321,7 +319,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                       y={i * rowHeight}
                       width={chartWidth}
                       height={rowHeight}
-                      fill={i % 2 === 0 ? "#f1f5f9" : "#e2e8f0"}
+                      fill={i % 2 === 0 ? "var(--gantt-row-even, #f1f5f9)" : "var(--gantt-row-odd, #e2e8f0)"}
                       className={i % 2 === 0 ? "dark:fill-gray-900" : "dark:fill-gray-800"}
                     />
                   ))}
@@ -335,10 +333,10 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                       const x = dateToX(row.timeline.start, minDate, maxDate, chartWidth);
                       const x2 = dateToX(row.timeline.end, minDate, maxDate, chartWidth);
                       const color = row.color || (row.type === "project"
-                          ? "#0ea5e9"
+                          ? "var(--gantt-bar-project, #0ea5e9)"
                           : row.type === "network"
-                          ? "#38bdf8"
-                          : "#a21caf");
+                          ? "var(--gantt-bar-network, #38bdf8)"
+                          : "var(--gantt-bar-other, #a21caf)");
                       // Use lower opacity in dark mode
                       const barOpacity = typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? 0.28 : 0.18;
                       return (
@@ -375,8 +373,8 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                                 `${cx - size / 2},${cy}`
                               ].join(" ");
                             })()}
-                            fill="#0ea5e9"
-                            stroke="#0369a1"
+                            fill="var(--gantt-milestone-fill, #0ea5e9)"
+                            stroke="var(--gantt-milestone-stroke, #0369a1)"
                             strokeWidth={1}
                             className="dark:fill-cyan-400 dark:stroke-cyan-700"
                           />
@@ -398,8 +396,8 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                               dateToX(row.operation.startDate, minDate, maxDate, chartWidth)
                             }
                             height={rowHeight - 16}
-                            fill={row.color || "#38bdf8"}
-                            stroke={row.color || "#0ea5e9"}
+                            fill={row.color || "var(--gantt-bar-operation, #38bdf8)"}
+                            stroke={row.color || "var(--gantt-bar-operation-stroke, #0ea5e9)"}
                             strokeWidth={1}
                             rx={4}
                             className="dark:fill-sky-700 dark:stroke-sky-400"
@@ -425,7 +423,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                       const predecessorX = dateToX(predecessorOp.endDate, minDate, maxDate, chartWidth);
                       const predecessorY = predecessorIdx * rowHeight + rowHeight / 2;
                       // Start with orange, use lighter orange in dark mode
-                      const arrowStroke = typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? '#fbbf24' : '#f59e42';
+                      const arrowStroke = typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? 'var(--gantt-arrow-dark, #fbbf24)' : 'var(--gantt-arrow, #f59e42)';
                       // Draw a polyline: horizontal from predecessorX to a midX, vertical to successorY, then horizontal to successorX
                       const midX = Math.min(predecessorX + 24, successorX - 12); // 24px horizontal, but don't overshoot
                       const points = [
