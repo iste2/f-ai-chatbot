@@ -91,6 +91,18 @@ const components: Partial<Components> = {
       </h6>
     );
   },
+  table: ({ node, children, ...props }) => {
+    return (
+      <div className="overflow-x-auto my-6">
+        <table
+          className="min-w-full border-collapse rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm border border-border [&_th]:bg-muted [&_th]:font-semibold [&_th]:text-left [&_th]:px-4 [&_th]:py-2 [&_th]:border-b [&_th]:border-border [&_td]:px-4 [&_td]:py-2 [&_td]:border-b [&_td]:border-border [&_tr:last-child_th]:border-b-0 [&_tr:last-child_td]:border-b-0 [&_tbody_tr:hover]:bg-muted/60 transition-colors"
+          {...props}
+        >
+          {children}
+        </table>
+      </div>
+    );
+  },
 };
 
 const remarkPlugins = [remarkGfm];
