@@ -15,11 +15,8 @@ export const ArtifactDocumentation: React.FC<ArtifactDocumentationProps> = ({ do
 
   return (
     <Card className="my-4">
-      <CardHeader>
-        <CardTitle>Documentation</CardTitle>
-      </CardHeader>
       <CardContent>
-        <div className="whitespace-pre-line text-sm text-gray-800 dark:text-gray-200">
+        <div className="whitespace-pre-line text-sm text-gray-800 dark:text-gray-200 mt-6">
           {expanded || !isLong ? documentation : preview}
         </div>
       </CardContent>
