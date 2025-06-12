@@ -23,6 +23,16 @@ function ExpandableTable({ children, ...props }: { children: React.ReactNode }) 
       colCount = Children.count(firstRow.props.children);
     }
   }
+  // Count rows in tbody
+  let rowCount = 0;
+  if (tbody && (tbody as any).props && (tbody as any).props.children) {
+    const bodyRows = (tbody as any).props.children;
+    if (Array.isArray(bodyRows)) {
+      rowCount = bodyRows.length;
+    } else if (bodyRows) {
+      rowCount = 1;
+    }
+  }
   return (
     <div className="overflow-x-auto my-6">
       <table
@@ -31,6 +41,11 @@ function ExpandableTable({ children, ...props }: { children: React.ReactNode }) 
       >
         {thead}
         {expanded && tbody}
+        {!expanded && (
+          <caption className="text-center text-muted-foreground py-4 caption-bottom">
+            Expand to display data ({rowCount} row{rowCount === 1 ? '' : 's'})
+          </caption>
+        )}
       </table>
       <div className="flex items-center gap-2 mt-2">
         <Button
