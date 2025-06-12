@@ -14,7 +14,7 @@ export const ArtifactDocumentation: React.FC<ArtifactDocumentationProps> = ({ do
         📄 {firstLine}
       </summary>
       <div className="p-4">
-        <Markdown className="prose dark:prose-invert max-w-none whitespace-pre-line text-sm text-gray-800 dark:text-gray-200 mt-2">
+        <Markdown>
           {documentation}
         </Markdown>
       </div>
