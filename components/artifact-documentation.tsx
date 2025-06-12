@@ -1,41 +1,24 @@
-import React, { useState } from "react";
-import { Button } from "./ui/button";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "./ui/card";
+import React from "react";
+import { Markdown } from "./markdown";
 
 interface ArtifactDocumentationProps {
   documentation: string;
 }
 
 export const ArtifactDocumentation: React.FC<ArtifactDocumentationProps> = ({ documentation }) => {
-  const [expanded, setExpanded] = useState(false);
   if (!documentation) return null;
-  const PREVIEW_LENGTH = 150;
-  const isLong = documentation.length > PREVIEW_LENGTH;
-  const preview = isLong ? `${documentation.slice(0, PREVIEW_LENGTH)}...` : documentation;
-
+  const firstLine = documentation.split("\n")[0];
   return (
-    <Card className="my-4">
-      <CardHeader>
-        <CardTitle>Documentation</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="whitespace-pre-line text-sm text-gray-800 dark:text-gray-200">
-          {expanded || !isLong ? documentation : preview}
-        </div>
-      </CardContent>
-      {isLong && (
-        <CardFooter className="justify-start">
-          <Button
-            variant="default"
-            size="sm"
-            className=""
-            onClick={() => setExpanded((e) => !e)}
-          >
-            {expanded ? "Collapse" : "Expand"}
-          </Button>
-        </CardFooter>
-      )}
-    </Card>
+    <details className="mb-4 border rounded bg-muted">
+      <summary className="font-normal text-center p-2 min-h-0 flex cursor-pointer select-none">
+        📄 {firstLine}
+      </summary>
+      <div className="p-4">
+        <Markdown>
+          {documentation}
+        </Markdown>
+      </div>
+    </details>
   );
 };
 

@@ -19,14 +19,24 @@ function PureSuggestedActions({
 }: SuggestedActionsProps) {
   const suggestedActions = [
     {
-      title: 'Show me',
-      label: 'the projects in a gantt chart',
-      action: 'Show me my projects in a gantt chart',
+      title: 'Summarize',
+      label: 'the current project status',
+      action: 'Summarize the current status of all my projects',
     },
     {
-      title: 'Tell me about',
-      label: `my resources and employees`,
-      action: `Tell me about my resources and employees`,
+      title: 'Generate',
+      label: 'a project progress report',
+      action: 'Generate a detailed progress report for my active projects',
+    },
+    {
+      title: 'Show',
+      label: 'resource allocation and workload',
+      action: 'Show me the current resource allocation and team workload',
+    },
+    {
+      title: 'Suggest',
+      label: 'next steps for my team',
+      action: 'Suggest the next steps my team should take to meet project goals',
     },
   ];
 

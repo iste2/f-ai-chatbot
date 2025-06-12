@@ -223,7 +223,7 @@ const PurePreviewMessage = ({
                           documentation={result.description}
                         />
                       ) : toolName === 'sqlTool' ? (
-                        <SqlViewer initialQuery={result.query} valid={result.valid} />
+                        <SqlViewer initialQuery={result.query} valid={result.valid} result={result.result} />
                       ) : toolName === 'shiftViewerTool' ? (
                         <ShiftViewer shifts={result.shifts} />
                       ) : toolName === 'ganttViewerTool' ? (
