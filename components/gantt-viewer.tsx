@@ -278,19 +278,14 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                 {/* Timeline bars for project, network, milestone */}
                 {rows.map((row, i) => {
                   if (
-                    (row.type === "project" || row.type === "network") &&
+                    row.type === "project" &&
                     row.timeline.start &&
                     row.timeline.end
                   ) {
+                    // Project: pill-shaped (fully rounded) rectangle
                     const x = dateToX(row.timeline.start, minDate, maxDate, chartWidth);
                     const x2 = dateToX(row.timeline.end, minDate, maxDate, chartWidth);
-                    const color = row.color || (row.type === "project"
-                        ? "var(--gantt-bar-project, #0ea5e9)"
-                        : row.type === "network"
-                        ? "var(--gantt-bar-network, #38bdf8)"
-                        : "var(--gantt-bar-other, #a21caf)");
-                    // Use lower opacity in dark mode
-                    const barOpacity = typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? 0.28 : 0.18;
+                    const color = row.color;
                     return (
                       <rect
                         key={`${row.label}-timeline`}
@@ -299,8 +294,34 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
                         width={x2 - x}
                         height={rowHeight - 8}
                         fill={color}
-                        opacity={barOpacity}
-                        rx={4}
+                        rx={(rowHeight - 8) / 2}
+                      />
+                    );
+                  }
+                  if (
+                    row.type === "network" &&
+                    row.timeline.start &&
+                    row.timeline.end
+                  ) {
+                    // Network: parallelogram (slanted rectangle) with reduced height
+                    const x = dateToX(row.timeline.start, minDate, maxDate, chartWidth);
+                    const x2 = dateToX(row.timeline.end, minDate, maxDate, chartWidth);
+                    const yCenter = i * rowHeight + rowHeight / 2;
+                    const netHeight = rowHeight * 0.5; // 50% of row height
+                    const yTop = yCenter - netHeight / 2;
+                    const yBot = yCenter + netHeight / 2;
+                    const slant = 18;
+                    const color = row.color;
+                    return (
+                      <polygon
+                        key={`${row.label}-timeline`}
+                        points={`
+                          ${x + slant},${yTop}
+                          ${x2},${yTop}
+                          ${x2 - slant},${yBot}
+                          ${x},${yBot}
+                        `}
+                        fill={color}
                       />
                     );
                   }
