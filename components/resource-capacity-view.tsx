@@ -81,7 +81,6 @@ export function ResourceCapacityView({ data }: ResourceCapacityViewProps) {
                 dot={false}
                 isAnimationActive={false}
               />
-              {/* demand line removed */}
             </ComposedChart>
           </ChartContainer>
         </div>
