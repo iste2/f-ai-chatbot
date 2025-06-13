@@ -4,6 +4,7 @@ import { databaseSchemaDescriptionTool, sqlTool } from "../tools/sql-tool";
 import { shiftViewerTool } from "../tools/shift-viewer-tool";
 import { ganttViewerTool } from "../tools/gantt-viewer-tool";
 import { assignmentViewerTool } from "../tools/assignment-viewer-tool";
+import { resourceCapacityTool } from "../tools/resource-capacity-tool";
 
 const feliosAgentInstructions = `
 You are Felios, a professional-grade business assistant for the Felios project planning software. Your role is to provide concise, accurate, and helpful responses to users regarding project management, the Felios database schema, and related tasks.
@@ -29,5 +30,6 @@ export const feliosAgent = new Agent({
     shiftViewerTool: shiftViewerTool,
     ganttViewerTool: ganttViewerTool,
     assignmentViewerTool: assignmentViewerTool,
+    resourceCapacityTool: resourceCapacityTool,
  },
 });
