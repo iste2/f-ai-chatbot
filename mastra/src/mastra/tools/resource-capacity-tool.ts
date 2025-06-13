@@ -5,7 +5,7 @@ import path from "node:path";
 
 export const resourceCapacityTool = createTool({
     id: 'resource-capacity-tool',
-    description: 'A tool to visualize the resource capacity for a given resource.',
+    description: 'A tool to visualize the resource capacity for a given resource. Displays the maximum possible capacity and yet assigned capacity for each day in the specified date range.',
     inputSchema: z.object({
         resourceId: z.string().describe('ID of the resource to calculate capacity for'),
         startDate: z.string().describe('Start date in YYYY-MM-DD format'),
