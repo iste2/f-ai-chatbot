@@ -25,6 +25,7 @@ import ShiftViewer from './shift-viewer';
 import GanttViewer from './gantt-viewer';
 import AssignmentViewer from './assignment-viewer';
 import ResourceCapacityView from './resource-capacity-view';
+import ToolViewer from './tool-viewer';
 
 const PurePreviewMessage = ({
   chatId,
@@ -234,7 +235,7 @@ const PurePreviewMessage = ({
                       ) : toolName === 'resourceCapacityTool' ? (
                         <ResourceCapacityView data={result.data} />
                       ) : (
-                        <pre>{JSON.stringify(result, null, 2)}</pre>
+                        <ToolViewer toolName={toolName} result={result} />
                       )}
                     </div>
                   );
