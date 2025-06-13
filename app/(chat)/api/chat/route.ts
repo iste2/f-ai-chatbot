@@ -161,11 +161,10 @@ export async function POST(request: Request) {
     return new Response(stream);
 
   } catch (error) {
+    console.error(error);
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
-
-    console.error(error);
     return new Response('Internal Server Error', { status: 500 });
   }
 }

@@ -9,7 +9,7 @@ export const shiftViewerTool = createTool({
     inputSchema: z.object({
         startDate: z.string().describe('Start date in YYYY-MM-DD format'),
         endDate: z.string().describe('End date in YYYY-MM-DD format'),
-        employeeIds: z.array(z.string()).describe('Array of employee IDs to view shifts for'),
+        employeeIds: z.array(z.number()).describe('Array of employee IDs to view shifts for'),
     }),
     outputSchema: z.object({
         shifts: z.array(z.object({
@@ -39,11 +39,9 @@ export const shiftViewerTool = createTool({
                 ORDER BY es.employee_id, es.date
             `);
             shifts = stmt.all(...employeeIds, startDate, endDate) as Shift[];
-            console.log('Fetched shifts:', shifts);
         } catch (error) {
             console.error('Error fetching shifts:', error);
-        } 
-        finally {
+        } finally {
             db.close();
         }
         return { shifts };

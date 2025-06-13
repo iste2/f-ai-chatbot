@@ -1172,3 +1172,24 @@ export const WarningIcon = ({ size = 16 }: { size?: number }) => {
     </svg>
   );
 };
+
+export const LogoIcon = ({ width = 22.931, height = 19.355 }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0.3225 22.931 19.3546"
+    width={width}
+    height={height}
+  >
+    <g id="Symbols" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+      <g id="logo" transform="translate(-1.000000, 0.000000)">
+        <g id="Group" transform="translate(1.000000, 0.000000)">
+          <polygon
+            id="Path"
+            fill="#0090A7"
+            points="17.4713583 19.677077 22.9310024 0.322514799 5.4600586 0.322514799 0 19.677077"
+          />
+        </g>
+      </g>
+    </g>
+  </svg>
+);
