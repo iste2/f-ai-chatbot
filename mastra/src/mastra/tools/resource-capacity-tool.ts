@@ -16,7 +16,6 @@ export const resourceCapacityTool = createTool({
             date: z.string().describe('Date in YYYY-MM-DD format'),
             capacity: z.number().describe('Max possible resource capacity for the given date'),
             assigned: z.number().describe('Assigned resource capacity for the given date'),
-            demand: z.number().optional().describe('Demand for the resource on the given date'),
         })),
     }).describe('An object containing the resource capacity visualization data.'),
     execute: async ({ context: { resourceId, startDate, endDate } }) => {
@@ -24,12 +23,15 @@ export const resourceCapacityTool = createTool({
         const dbPath = path.join(process.cwd(), 'lib', 'db', 'felios-data', 'felios.db');
         const db = new Database(dbPath, { readonly: true });
         try {
+            // log input
+            console.log('Resource Capacity Tool Input:', { resourceId, startDate, endDate });
             // 1. Get all employees qualified for the resource
             const qualifiedStmt = db.prepare(`
                 SELECT employee_id FROM employee_qualification WHERE resource_id = ?
             `);
             const qualifiedRows = qualifiedStmt.all(resourceId);
             const qualifiedEmployeeIds = qualifiedRows.map((row: any) => row.employee_id);
+            console.log('Qualified employees:', qualifiedEmployeeIds);
             if (qualifiedEmployeeIds.length === 0) {
                 // No qualified employees, return 0 for all days
                 const result = [];
@@ -51,6 +53,7 @@ export const resourceCapacityTool = createTool({
                   AND es.date >= ? AND es.date <= ?
             `);
             const shiftRows = shiftStmt.all(...qualifiedEmployeeIds, startDate, endDate);
+            console.log('Shift rows:', shiftRows);
             // Map: { [date]: { [employee_id]: daily_capacity } }
             const shiftMap: Record<string, Record<string, number>> = {};
             for (const row of shiftRows as Array<{ employee_id: string; date: string; daily_capacity: number }>) {
@@ -61,6 +64,7 @@ export const resourceCapacityTool = createTool({
             // 3. Get all operations for this resource (with their start/end/capacity demand)
             const opStmt = db.prepare(`SELECT id, start_date, end_date, time_capacity_demand FROM operation WHERE resource_id = ?`);
             const opRows = opStmt.all(resourceId);
+            console.log('Operation rows:', opRows);
             const opIds = opRows.map((row: any) => row.id);
 
             // Build a map of operationId -> {start, end, demand, duration, dailyDemand}
@@ -90,12 +94,15 @@ export const resourceCapacityTool = createTool({
                     GROUP BY date
                 `);
                 const assignRows = assignStmt.all(...opIds, startDate, endDate);
+                console.log('Assignment rows:', assignRows);
                 for (const row of assignRows as Array<{ date: string; assigned: number }>) {
                     assignmentMap[row.date] = row.assigned;
                 }
+            } else {
+                console.log('No operation IDs for assignments.');
             }
 
-            // 5. For each day, calculate capacity, assigned, and demand
+            // 5. For each day, calculate capacity and assigned
             const result = [];
             let d = new Date(startDate);
             const end = new Date(endDate);
@@ -108,15 +115,8 @@ export const resourceCapacityTool = createTool({
                     }
                 }
                 const assigned = assignmentMap[dateStr] || 0;
-                // Calculate demand: sum dailyDemand for all ops active on this date
-                let demand = 0;
-                for (const opId in opDemandMap) {
-                    const op = opDemandMap[opId];
-                    if (dateStr >= op.start && dateStr <= op.end) {
-                        demand += op.dailyDemand;
-                    }
-                }
-                result.push({ date: dateStr, capacity, assigned, demand });
+                result.push({ date: dateStr, capacity, assigned });
+                console.log(`Date: ${dateStr}, Capacity: ${capacity}, Assigned: ${assigned}`);
                 d.setDate(d.getDate() + 1);
             }
             return { data: result };

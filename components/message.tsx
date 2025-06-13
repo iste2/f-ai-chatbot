@@ -24,6 +24,7 @@ import ArtifactDocumentation from './artifact-documentation';
 import ShiftViewer from './shift-viewer';
 import GanttViewer from './gantt-viewer';
 import AssignmentViewer from './assignment-viewer';
+import ResourceCapacityView from './resource-capacity-view';
 
 const PurePreviewMessage = ({
   chatId,
@@ -230,6 +231,8 @@ const PurePreviewMessage = ({
                         <GanttViewer projects={result.projects} />
                       ) : toolName === 'assignmentViewerTool' ? (
                         <AssignmentViewer assignments={result.assignments} />
+                      ) : toolName === 'resourceCapacityTool' ? (
+                        <ResourceCapacityView data={result.data} />
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
