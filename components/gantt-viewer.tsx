@@ -2,11 +2,6 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 
 // Types matching gantt-viewer-tool.ts output schema
-export type Employee = {
-  id: number;
-  name: string;
-  assignedCapacity: number;
-};
 export type Operation = {
   id: number;
   name: string;
@@ -14,7 +9,6 @@ export type Operation = {
   endDate: string | null;
   timeCapacityDemand: number;
   resourceId: number;
-  employees: Employee[];
   dependencies: number[];
 };
 export type Network = {

@@ -5,7 +5,7 @@ import path from "node:path";
 
 export const ganttViewerTool = createTool({
     id: 'gantt-viewer-tool',
-    description: 'A tool to fetch project, network, milestone, and operation data as a tree for Gantt chart display, including assigned employees for each operation. Input is a list of project IDs; the full project tree is returned for each.',
+    description: 'A tool to fetch project, network, milestone, and operation data as a tree for Gantt chart display. Input is a list of project IDs; the full project tree is returned for each.',
     inputSchema: z.object({
         projectIds: z.array(z.number()).describe('Array of project IDs to include'),
     }),
@@ -29,11 +29,6 @@ export const ganttViewerTool = createTool({
                     endDate: z.string().nullable(),
                     timeCapacityDemand: z.number(),
                     resourceId: z.number(),
-                    employees: z.array(z.object({
-                        id: z.number(),
-                        name: z.string(),
-                        assignedCapacity: z.number(),
-                    })),
                     dependencies: z.array(z.number()),
                 })),
             })),
@@ -55,23 +50,8 @@ export const ganttViewerTool = createTool({
             if (networkIds.length > 0) {
                 operations = db.prepare(`SELECT id, name, start_date, end_date, time_capacity_demand, resource_id, network_id FROM operation WHERE network_id IN (${networkIds.map(() => '?').join(',')})`).all(...networkIds);
             }
-            // Fetch employees for all operations (with assigned capacity)
-            const opIds = operations.map(op => op.id);
-            const employeesByOp: Record<number, { id: number, name: string, assignedCapacity: number }[]> = {};
-            if (opIds.length > 0) {
-                const rows = db.prepare(`
-                    SELECT oa.operation_id as opId, e.id as id, e.name as name, SUM(oa.assigned_capacity) as assignedCapacity
-                    FROM operation_assignment oa
-                    JOIN employee e ON oa.employee_id = e.id
-                    WHERE oa.operation_id IN (${opIds.map(() => '?').join(',')})
-                    GROUP BY oa.operation_id, e.id
-                `).all(...opIds) as Array<{opId: number, id: number, name: string, assignedCapacity: number}>;
-                for (const row of rows) {
-                    if (!employeesByOp[row.opId]) employeesByOp[row.opId] = [];
-                    employeesByOp[row.opId].push({ id: row.id, name: row.name, assignedCapacity: row.assignedCapacity });
-                }
-            }
             // Fetch dependencies for all operations
+            const opIds = operations.map(op => op.id);
             const dependenciesByOp: Record<number, number[]> = {};
             if (opIds.length > 0) {
                 const depRows = db.prepare(`
@@ -109,7 +89,6 @@ export const ganttViewerTool = createTool({
                                 endDate: op.end_date,
                                 timeCapacityDemand: op.time_capacity_demand,
                                 resourceId: op.resource_id,
-                                employees: employeesByOp[op.id] || [],
                                 dependencies: dependenciesByOp[op.id] || [],
                             })),
                         };
