@@ -8,8 +8,8 @@ import { SessionProvider } from 'next-auth/react';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://chat.vercel.ai'),
-  title: 'FELIOS | Chatbot',
-  description: 'FELIOS | Chatbot using the AI SDK.',
+  title: 'FELIOS',
+  description: 'FELIOS Chatbot using the AI SDK.',
 };
 
 export const viewport = {

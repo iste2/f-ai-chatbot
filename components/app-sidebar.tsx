@@ -35,7 +35,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               className="flex flex-row gap-3 items-center"
             >
               <span className="flex flex-row items-center gap-2 text-lg font-semibold px-2 hover:bg-muted rounded-md cursor-pointer">
-                <LogoIcon width={22} height={19} /> FELIOS | Chatbot
+                <LogoIcon width={22} height={19} /> FELIOS
               </span>
             </Link>
             <Tooltip>
