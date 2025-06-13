@@ -73,7 +73,7 @@ export function ResourceCapacityView({ data }: ResourceCapacityViewProps) {
                 opacity={0.7}
               />
               <Line
-                type="stepAfter"
+                type="step"
                 dataKey="capacity"
                 name="Capacity"
                 stroke={chartConfig.capacity.color}
