@@ -39,7 +39,11 @@ export const shiftViewerTool = createTool({
                 ORDER BY es.employee_id, es.date
             `);
             shifts = stmt.all(...employeeIds, startDate, endDate) as Shift[];
-        } finally {
+            console.log('Fetched shifts:', shifts);
+        } catch (error) {
+            console.error('Error fetching shifts:', error);
+        } 
+        finally {
             db.close();
         }
         return { shifts };

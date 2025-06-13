@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "./ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 
 // Types matching gantt-viewer-tool.ts output schema
 export type Employee = {
@@ -96,12 +91,13 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
   const [minDate, maxDate] = getDateRange(allOperations, allMilestones);
   if (!minDate || !maxDate) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Gantt Chart</CardTitle>
-        </CardHeader>
-        <CardContent>No data to display.</CardContent>
-      </Card>
+      <div className="overflow-x-auto">
+        <div className="max-h-96 overflow-y-auto border rounded bg-muted mt-6 dark:bg-gray-900">
+          <div className="flex flex-col items-center justify-center h-40">
+            <span className="text-gray-500 dark:text-gray-300">No data to display.</span>
+          </div>
+        </div>
+      </div>
     );
   }
   // Chart layout
@@ -156,290 +152,259 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
   const chartHeight = rows.length * rowHeight;
   // Render
   return (
-    <div className="overflow-auto max-h-96 border rounded bg-muted mt-6 dark:bg-gray-900" style={{ overflowY: 'auto', position: 'relative', paddingBottom: 24 }}>
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        {/* Labels */}
-        <div style={{ width: labelWidth, display: "flex", flexDirection: "column", marginTop: 40, paddingRight: 16 }}>
-          {rows.map((row, i) => (
-            <div
-              key={
-                row.type === "project"
-                  ? `project-${row.id}`
-                  : row.type === "network"
-                  ? `network-${row.id}`
-                  : row.type === "milestone"
-                  ? `milestone-${row.projectId}-${row.milestone.id}`
-                  : row.type === "operation"
-                  ? `operation-${row.projectId}-${row.networkId}-${row.operation.id}`
-                  : `row-${i}`
-              }
-              style={{
-                height: rowHeight,
-                lineHeight: `${rowHeight}px`,
-                display: "flex",
-                alignItems: "center",
-                whiteSpace: "nowrap",
-                overflow: "visible",
-                textOverflow: "unset",
-                fontWeight:
+    <div className="overflow-x-auto">
+      <div className="max-h-96 overflow-y-auto border rounded bg-muted mt-6 dark:bg-gray-900">
+        <div className="flex flex-row">
+          {/* Labels */}
+          <div
+            className="sticky left-0 top-10 z-20 bg-muted dark:bg-gray-900 pt-10"
+            style={{ width: labelWidth, minWidth: labelWidth, paddingRight: 16 }}
+          >
+            {rows.map((row, i) => (
+              <div
+                key={
                   row.type === "project"
-                    ? 700
+                    ? `project-${row.id}`
                     : row.type === "network"
-                    ? 600
+                    ? `network-${row.id}`
                     : row.type === "milestone"
-                    ? 500
-                    : 400,
-                color:
-                  row.type === "project"
-                    ? "var(--gantt-label-project, #1e293b)"
+                    ? `milestone-${row.projectId}-${row.milestone.id}`
+                    : row.type === "operation"
+                    ? `operation-${row.projectId}-${row.networkId}-${row.operation.id}`
+                    : `row-${i}`
+                }
+                className={
+                  `h-8 flex items-center whitespace-nowrap px-2 border-b border-gray-200 dark:border-gray-800 font-$
+                  {row.type === "project" ? "bold" : row.type === "network" ? "semibold" : row.type === "milestone" ? "medium" : "normal"} ` +
+                  (row.type === "project"
+                    ? "text-slate-900 dark:text-white cursor-pointer bg-gray-100 dark:bg-gray-800"
                     : row.type === "network"
-                    ? "var(--gantt-label-network, #334155)"
+                    ? "text-slate-800 dark:text-white cursor-pointer bg-gray-50 dark:bg-gray-900"
                     : row.type === "milestone"
-                    ? "var(--gantt-label-milestone, #0e7490)"
-                    : "var(--gantt-label-default, inherit)",
-                cursor:
-                  row.type === "project" || row.type === "network"
-                    ? "pointer"
-                    : undefined,
-                userSelect: "none",
-                boxSizing: "border-box",
-                padding: 5,
-                margin: 0,
-              }}
-              className={
-                `transition-colors ${row.type === "project"
-                  ? "dark:text-white dark:font-extrabold"
-                  : row.type === "network"
-                  ? "dark:text-white dark:font-extrabold"
-                  : row.type === "milestone"
-                  ? "dark:text-cyan-50"
-                  : "dark:text-white"}`
-              }
-              {...((row.type === "project" || row.type === "network") && {
-                onClick: () => {
+                    ? "text-cyan-700 dark:text-cyan-50 bg-white dark:bg-gray-900"
+                    : "text-slate-700 dark:text-white bg-white dark:bg-gray-900")
+                }
+                style={{ lineHeight: `${rowHeight}px` }}
+                tabIndex={row.type === "project" || row.type === "network" ? 0 : undefined}
+                role={row.type === "project" || row.type === "network" ? "button" : undefined}
+                onClick={() => {
                   if (row.type === "project") toggleProject(row.id);
                   if (row.type === "network") toggleNetwork(row.id);
-                },
-                onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
-                  if (e.key === "Enter" || e.key === " ") {
+                }}
+                onKeyDown={e => {
+                  if ((e.key === "Enter" || e.key === " ") && (row.type === "project" || row.type === "network")) {
                     e.preventDefault();
                     if (row.type === "project") toggleProject(row.id);
                     if (row.type === "network") toggleNetwork(row.id);
                   }
-                },
-                role: "button",
-                tabIndex: 0,
-              })}
-            >
-              {row.type === "project" && (
-                <span style={{ marginRight: 8, display: "inline-block", width: 16 }}>
-                  {expandedProjects[row.id] ? "▼" : "▶"}
+                }}
+              >
+                {row.type === "project" && (
+                  <span className="mr-2 inline-block w-4">{expandedProjects[row.id] ? "▼" : "▶"}</span>
+                )}
+                {row.type === "network" && (
+                  <span className="mr-2 inline-block w-4">{expandedNetworks[row.id] ? "▼" : "▶"}</span>
+                )}
+                {row.type !== "project" && row.type !== "network" && <span className="w-6 inline-block" />}
+                <span style={{ userSelect: "text" }}>
+                  {row.label}
                 </span>
-              )}
-              {row.type === "network" && (
-                <span style={{ marginRight: 8, display: "inline-block", width: 16 }}>
-                  {expandedNetworks[row.id] ? "▼" : "▶"}
-                </span>
-              )}
-              {row.type !== "project" && row.type !== "network" && <span style={{ width: 24 }} />}
-              {row.label}
-              {row.type === "milestone" && row.milestone.dueDate && (
-                <span style={{ fontSize: 12, marginLeft: 8 }} className="dark:text-cyan-100">
-                  ({row.milestone.dueDate})
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-        {/* Chart SVG without horizontal scroll */}
-        <div style={{ flex: 1, minWidth: chartWidth, position: 'relative' }}>
-          <div style={{ height: chartHeight + 40, position: 'relative', zIndex: 1 }}>
-            {/* Timeline axis */}
-            <svg width={chartWidth} height={40} className="bg-[#f8fafc] dark:bg-gray-800">
-              {/* Draw time axis ticks and labels */}
-              {(() => {
-                const nTicks = 8;
-                const ticks = Array.from({ length: nTicks + 1 }, (_, i) =>
-                  new Date(minDate.getTime() + ((maxDate.getTime() - minDate.getTime()) * i) / nTicks)
-                );
-                // Use CSS variable for dark mode stroke
-                const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
-                const axisStroke = isDark ? 'var(--gantt-axis-stroke-dark, #334155)' : 'var(--gantt-axis-stroke, #cbd5e1)';
-                const axisText = isDark ? 'var(--gantt-axis-text-dark, #fff)' : 'var(--gantt-axis-text, #334155)';
-                return (
-                  <g>
-                    {ticks.map((d, i) => (
-                      <g key={d.toISOString()}>
-                        <line
-                          x1={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
-                          y1={0}
-                          x2={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
-                          y2={40}
-                          stroke={axisStroke}
-                          strokeDasharray="2 2"
-                        />
-                        <text
-                          x={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
-                          y={32}
-                          fontSize={13}
-                          textAnchor="middle"
-                          fill={axisText}
-                          fontWeight={isDark ? 700 : 500}
-                        >
-                          {d.toISOString().slice(0, 10)}
-                        </text>
-                      </g>
-                    ))}
-                  </g>
-                );
-              })()}
-            </svg>
-            <svg width={chartWidth} height={chartHeight} className="bg-[#f8fafc] dark:bg-gray-800">
-              {/* Grid lines */}
-              {rows.map((row, i) => (
-                <rect
-                  key={
-                    row.type === "project"
-                      ? `project-${row.id}`
-                      : row.type === "network"
-                      ? `network-${row.id}`
-                      : row.type === "milestone"
-                      ? `milestone-${row.projectId}-${row.milestone.id}`
-                      : row.type === "operation"
-                      ? `operation-${row.projectId}-${row.networkId}-${row.operation.id}`
-                      : `row-${i}`
-                  }
-                  x={0}
-                  y={i * rowHeight}
-                  width={chartWidth}
-                  height={rowHeight}
-                  fill={i % 2 === 0 ? "var(--gantt-row-even, #f1f5f9)" : "var(--gantt-row-odd, #e2e8f0)"}
-                  className={i % 2 === 0 ? "dark:fill-gray-900" : "dark:fill-gray-800"}
-                />
-              ))}
-              {/* Timeline bars for project, network, milestone */}
-              {rows.map((row, i) => {
-                if (
-                  (row.type === "project" || row.type === "network") &&
-                  row.timeline.start &&
-                  row.timeline.end
-                ) {
-                  const x = dateToX(row.timeline.start, minDate, maxDate, chartWidth);
-                  const x2 = dateToX(row.timeline.end, minDate, maxDate, chartWidth);
-                  const color = row.color || (row.type === "project"
-                      ? "var(--gantt-bar-project, #0ea5e9)"
-                      : row.type === "network"
-                      ? "var(--gantt-bar-network, #38bdf8)"
-                      : "var(--gantt-bar-other, #a21caf)");
-                  // Use lower opacity in dark mode
-                  const barOpacity = typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? 0.28 : 0.18;
-                  return (
-                    <rect
-                      key={`${row.label}-timeline`}
-                      x={x}
-                      y={i * rowHeight + 4}
-                      width={x2 - x}
-                      height={rowHeight - 8}
-                      fill={color}
-                      opacity={barOpacity}
-                      rx={4}
-                    />
+                {row.type === "milestone" && row.milestone.dueDate && (
+                  <span className="text-xs ml-2 text-cyan-700 dark:text-cyan-100">({row.milestone.dueDate})</span>
+                )}
+              </div>
+            ))}
+          </div>
+          {/* Chart SVG */}
+          <div className="flex-1 min-w-[800px] relative">
+            <div style={{ height: chartHeight + 40, position: 'relative', zIndex: 1 }}>
+              {/* Timeline axis */}
+              <svg width={chartWidth} height={40} className="bg-[#f8fafc] dark:bg-gray-800 sticky top-0 z-20">
+                {/* Draw time axis ticks and labels */}
+                {(() => {
+                  const nTicks = 8;
+                  const ticks = Array.from({ length: nTicks + 1 }, (_, i) =>
+                    new Date(minDate.getTime() + ((maxDate.getTime() - minDate.getTime()) * i) / nTicks)
                   );
-                }
-                return null;
-              })}
-              {/* Milestone markers */}
-              {rows.map(
-                (row, i) =>
-                  row.type === "milestone" &&
-                  row.milestone.dueDate && (
-                    <g key={`ms-${row.projectId}-${row.milestone.id}`}>
-                      {/* Diamond shape for milestone */}
-                      <polygon
-                        points={(() => {
-                          const cx = dateToX(row.milestone.dueDate, minDate, maxDate, chartWidth);
-                          const cy = i * rowHeight + rowHeight / 2;
-                          const size = 12;
-                          return [
-                            `${cx},${cy - size / 2}`,
-                            `${cx + size / 2},${cy}`,
-                            `${cx},${cy + size / 2}`,
-                            `${cx - size / 2},${cy}`
-                          ].join(" ");
-                        })()}
-                        fill="var(--gantt-milestone-fill, #0ea5e9)"
-                        stroke="var(--gantt-milestone-stroke, #0369a1)"
-                        strokeWidth={1}
-                        className="dark:fill-cyan-400 dark:stroke-cyan-700"
-                      />
+                  // Use CSS variable for dark mode stroke
+                  const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
+                  const axisStroke = isDark ? 'var(--gantt-axis-stroke-dark, #334155)' : 'var(--gantt-axis-stroke, #cbd5e1)';
+                  const axisText = isDark ? 'var(--gantt-axis-text-dark, #fff)' : 'var(--gantt-axis-text, #334155)';
+                  return (
+                    <g>
+                      {ticks.map((d, i) => (
+                        <g key={d.toISOString()}>
+                          <line
+                            x1={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
+                            y1={0}
+                            x2={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
+                            y2={40}
+                            stroke={axisStroke}
+                            strokeDasharray="2 2"
+                          />
+                          <text
+                            x={dateToX(d.toISOString(), minDate, maxDate, chartWidth)}
+                            y={32}
+                            fontSize={13}
+                            textAnchor="middle"
+                            fill={axisText}
+                            fontWeight={isDark ? 700 : 500}
+                          >
+                            {d.toISOString().slice(0, 10)}
+                          </text>
+                        </g>
+                      ))}
                     </g>
-                  )
-              )}
-              {/* Operation bars */}
-              {rows.map(
-                (row, i) =>
-                  row.type === "operation" &&
-                  row.operation.startDate &&
-                  row.operation.endDate && (
-                    <g key={`op-${row.projectId}-${row.networkId}-${row.operation.id}`}>
+                  );
+                })()}
+              </svg>
+              <svg width={chartWidth} height={chartHeight} className="bg-[#f8fafc] dark:bg-gray-800">
+                {/* Grid lines */}
+                {rows.map((row, i) => (
+                  <rect
+                    key={
+                      row.type === "project"
+                        ? `project-${row.id}`
+                        : row.type === "network"
+                        ? `network-${row.id}`
+                        : row.type === "milestone"
+                        ? `milestone-${row.projectId}-${row.milestone.id}`
+                        : row.type === "operation"
+                        ? `operation-${row.projectId}-${row.networkId}-${row.operation.id}`
+                        : `row-${i}`
+                    }
+                    x={0}
+                    y={i * rowHeight}
+                    width={chartWidth}
+                    height={rowHeight}
+                    fill={i % 2 === 0 ? "var(--gantt-row-even, #f1f5f9)" : "var(--gantt-row-odd, #e2e8f0)"}
+                    className={i % 2 === 0 ? "dark:fill-gray-900" : "dark:fill-gray-800"}
+                  />
+                ))}
+                {/* Timeline bars for project, network, milestone */}
+                {rows.map((row, i) => {
+                  if (
+                    (row.type === "project" || row.type === "network") &&
+                    row.timeline.start &&
+                    row.timeline.end
+                  ) {
+                    const x = dateToX(row.timeline.start, minDate, maxDate, chartWidth);
+                    const x2 = dateToX(row.timeline.end, minDate, maxDate, chartWidth);
+                    const color = row.color || (row.type === "project"
+                        ? "var(--gantt-bar-project, #0ea5e9)"
+                        : row.type === "network"
+                        ? "var(--gantt-bar-network, #38bdf8)"
+                        : "var(--gantt-bar-other, #a21caf)");
+                    // Use lower opacity in dark mode
+                    const barOpacity = typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? 0.28 : 0.18;
+                    return (
                       <rect
-                        x={dateToX(row.operation.startDate, minDate, maxDate, chartWidth)}
-                        y={i * rowHeight + 8}
-                        width={
-                          dateToX(row.operation.endDate, minDate, maxDate, chartWidth) -
-                          dateToX(row.operation.startDate, minDate, maxDate, chartWidth)
-                        }
-                        height={rowHeight - 16}
-                        fill={row.color || "var(--gantt-bar-operation, #38bdf8)"}
-                        stroke={row.color || "var(--gantt-bar-operation-stroke, #0ea5e9)"}
-                        strokeWidth={1}
+                        key={`${row.label}-timeline`}
+                        x={x}
+                        y={i * rowHeight + 4}
+                        width={x2 - x}
+                        height={rowHeight - 8}
+                        fill={color}
+                        opacity={barOpacity}
                         rx={4}
-                        className="dark:fill-sky-700 dark:stroke-sky-400"
                       />
-                    </g>
-                  )
-              )}
-              {/* Dependency arrows */}
-              {rows.flatMap((row, i) => {
-                if (row.type !== "operation") return [];
-                const successorIdx = i;
-                const successorOp = row.operation;
-                if (!successorOp.startDate) return [];
-                const successorX = dateToX(successorOp.startDate, minDate, maxDate, chartWidth);
-                const successorY = successorIdx * rowHeight + rowHeight / 2;
-                return successorOp.dependencies.map((predecessorId) => {
-                  const predecessorIdx = opIdToRowIdx[predecessorId];
-                  if (predecessorIdx === undefined) return null;
-                  const predecessorRow = rows[predecessorIdx] as typeof row;
-                  const predecessorOp = predecessorRow.operation;
-                  if (!predecessorOp.endDate) return null;
-                  // Start at the end of the predecessor bar
-                  const predecessorX = dateToX(predecessorOp.endDate, minDate, maxDate, chartWidth);
-                  const predecessorY = predecessorIdx * rowHeight + rowHeight / 2;
-                  // Start with orange, use lighter orange in dark mode
-                  const arrowStroke = typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? 'var(--gantt-arrow-dark, #fbbf24)' : 'var(--gantt-arrow, #f59e42)';
-                  // Draw a polyline: horizontal from predecessorX to a midX, vertical to successorY, then horizontal to successorX
-                  const midX = Math.min(predecessorX + 24, successorX - 12); // 24px horizontal, but don't overshoot
-                  const points = [
-                    `${predecessorX},${predecessorY}`,
-                    `${midX},${predecessorY}`,
-                    `${midX},${successorY}`,
-                    `${successorX},${successorY}`
-                  ].join(" ");
-                  return (
-                    <g key={`dep-${predecessorOp.id}-${successorOp.id}`}>
-                      <polyline
-                        points={points}
-                        fill="none"
-                        stroke={arrowStroke}
-                        strokeWidth={2}
-                        className="dark:stroke-amber-400"
-                      />
-                    </g>
-                  );
-                });
-              })}
-            </svg>
+                    );
+                  }
+                  return null;
+                })}
+                {/* Milestone markers */}
+                {rows.map(
+                  (row, i) =>
+                    row.type === "milestone" &&
+                    row.milestone.dueDate && (
+                      <g key={`ms-${row.projectId}-${row.milestone.id}`}>
+                        {/* Diamond shape for milestone */}
+                        <polygon
+                          points={(() => {
+                            const cx = dateToX(row.milestone.dueDate, minDate, maxDate, chartWidth);
+                            const cy = i * rowHeight + rowHeight / 2;
+                            const size = 12;
+                            return [
+                              `${cx},${cy - size / 2}`,
+                              `${cx + size / 2},${cy}`,
+                              `${cx},${cy + size / 2}`,
+                              `${cx - size / 2},${cy}`
+                            ].join(" ");
+                          })()}
+                          fill="var(--gantt-milestone-fill, #0ea5e9)"
+                          stroke="var(--gantt-milestone-stroke, #0369a1)"
+                          strokeWidth={1}
+                          className="dark:fill-cyan-400 dark:stroke-cyan-700"
+                        />
+                      </g>
+                    )
+                )}
+                {/* Operation bars */}
+                {rows.map(
+                  (row, i) =>
+                    row.type === "operation" &&
+                    row.operation.startDate &&
+                    row.operation.endDate && (
+                      <g key={`op-${row.projectId}-${row.networkId}-${row.operation.id}`}>
+                        <rect
+                          x={dateToX(row.operation.startDate, minDate, maxDate, chartWidth)}
+                          y={i * rowHeight + 8}
+                          width={
+                            dateToX(row.operation.endDate, minDate, maxDate, chartWidth) -
+                            dateToX(row.operation.startDate, minDate, maxDate, chartWidth)
+                          }
+                          height={rowHeight - 16}
+                          fill={row.color || "var(--gantt-bar-operation, #38bdf8)"}
+                          stroke={row.color || "var(--gantt-bar-operation-stroke, #0ea5e9)"}
+                          strokeWidth={1}
+                          rx={4}
+                          className="dark:fill-sky-700 dark:stroke-sky-400"
+                        />
+                      </g>
+                    )
+                )}
+                {/* Dependency arrows */}
+                {rows.flatMap((row, i) => {
+                  if (row.type !== "operation") return [];
+                  const successorIdx = i;
+                  const successorOp = row.operation;
+                  if (!successorOp.startDate) return [];
+                  const successorX = dateToX(successorOp.startDate, minDate, maxDate, chartWidth);
+                  const successorY = successorIdx * rowHeight + rowHeight / 2;
+                  return successorOp.dependencies.map((predecessorId) => {
+                    const predecessorIdx = opIdToRowIdx[predecessorId];
+                    if (predecessorIdx === undefined) return null;
+                    const predecessorRow = rows[predecessorIdx] as typeof row;
+                    const predecessorOp = predecessorRow.operation;
+                    if (!predecessorOp.endDate) return null;
+                    // Start at the end of the predecessor bar
+                    const predecessorX = dateToX(predecessorOp.endDate, minDate, maxDate, chartWidth);
+                    const predecessorY = predecessorIdx * rowHeight + rowHeight / 2;
+                    // Start with orange, use lighter orange in dark mode
+                    const arrowStroke = typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? 'var(--gantt-arrow-dark, #fbbf24)' : 'var(--gantt-arrow, #f59e42)';
+                    // Draw a polyline: horizontal from predecessorX to a midX, vertical to successorY, then horizontal to successorX
+                    const midX = Math.min(predecessorX + 24, successorX - 12); // 24px horizontal, but don't overshoot
+                    const points = [
+                      `${predecessorX},${predecessorY}`,
+                      `${midX},${predecessorY}`,
+                      `${midX},${successorY}`,
+                      `${successorX},${successorY}`
+                    ].join(" ");
+                    return (
+                      <g key={`dep-${predecessorOp.id}-${successorOp.id}`}>
+                        <polyline
+                          points={points}
+                          fill="none"
+                          stroke={arrowStroke}
+                          strokeWidth={2}
+                          className="dark:stroke-amber-400"
+                        />
+                      </g>
+                    );
+                  });
+                })}
+              </svg>
+            </div>
           </div>
         </div>
       </div>
