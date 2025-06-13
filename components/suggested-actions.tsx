@@ -19,24 +19,44 @@ function PureSuggestedActions({
 }: SuggestedActionsProps) {
   const suggestedActions = [
     {
-      title: 'Summarize',
-      label: 'the current project status',
+      title: 'Project Summary',
+      label: 'Summarize the current status of all my projects',
       action: 'Summarize the current status of all my projects',
     },
     {
-      title: 'Generate',
-      label: 'a project progress report',
-      action: 'Generate a detailed progress report for my active projects',
+      title: 'Project Milestones',
+      label: 'Show all milestones for a selected project',
+      action: 'Show all milestones for a selected project, including their due dates.',
     },
     {
-      title: 'Show',
-      label: 'resource allocation and workload',
-      action: 'Show me the current resource allocation and team workload',
+      title: 'Shift Assignments',
+      label: 'List shifts and assigned employees for a week',
+      action: 'List all shifts and the employees assigned to each shift for the upcoming week.',
     },
     {
-      title: 'Suggest',
-      label: 'next steps for my team',
-      action: 'Suggest the next steps my team should take to meet project goals',
+      title: 'Upcoming Operations',
+      label: 'Show operations starting in the next 7 days',
+      action: 'Show all operations scheduled to start in the next 7 days.',
+    },
+    {
+      title: 'Resource Utilization',
+      label: 'Show utilization of a specific resource',
+      action: 'Show the utilization of a specific resource across all operations in the next 7 days.',
+    },
+    {
+      title: 'Operation Assignment Details',
+      label: 'List all assignments for a specific operation',
+      action: 'List all employee assignments for a specific operation, including dates and assigned capacity.',
+    },
+    {
+      title: 'Gantt Chart',
+      label: 'View the Gantt chart for selected projects',
+      action: 'Show a Gantt chart for the selected projects, including networks, milestones, and operations.',
+    },
+    {
+      title: 'Employee Qualifications',
+      label: 'Show all employees qualified for a specific resource',
+      action: 'Show all employees who are qualified to operate a specific resource.',
     },
   ];
 
