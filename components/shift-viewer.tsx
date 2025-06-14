@@ -76,9 +76,20 @@ export const ShiftViewer: React.FC<ShiftViewerProps> = ({ shifts }) => {
         <table className="min-w-full border-collapse">
           <thead>
             <tr>
-              <th className="px-2 py-1 bg-gray-100 sticky top-0 left-0 z-30 dark:bg-gray-800" style={{ background: undefined }}>Employee</th>
+              <th
+                className="px-2 py-1 bg-gray-100 sticky top-0 left-0 z-30 dark:bg-gray-800 whitespace-nowrap align-middle"
+                style={{ background: undefined, height: 40 }}
+              >
+                Employee
+              </th>
               {dates.map((date) => (
-                <th key={date} className="px-2 py-1 bg-gray-100 text-xs sticky top-0 z-20 dark:bg-gray-800">{date}</th>
+                <th
+                  key={date}
+                  className="p-0 bg-gray-100 text-xs sticky top-0 z-20 dark:bg-gray-800 align-middle"
+                  style={{ width: 40, minWidth: 40, maxWidth: 40, height: 40, textAlign: 'center' }}
+                >
+                  {date}
+                </th>
               ))}
             </tr>
           </thead>
@@ -93,7 +104,7 @@ export const ShiftViewer: React.FC<ShiftViewerProps> = ({ shifts }) => {
                       {shift ? (
                         <div
                           className="rounded shadow text-xs flex flex-col items-center justify-center"
-                          style={{ backgroundColor: shift.colorCode, minWidth: 48, minHeight: 32 }}
+                          style={{ backgroundColor: shift.colorCode, minWidth: 40, minHeight: 40, width: 40, height: 40 }}
                           title={`${shift.shiftName} (${shift.duration}h)`}
                         >
                           <span>{shift.shiftName.charAt(0)}</span>
