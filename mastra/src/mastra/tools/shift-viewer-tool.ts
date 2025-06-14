@@ -5,7 +5,7 @@ import path from "node:path";
 
 export const shiftViewerTool = createTool({
     id: 'shift-viewer-tool',
-    description: 'A tool to view the shifts of employees over a period of time.',
+    description: 'A tool to view the shifts of employees over a period of time. Helps in understanding how employees are scheduled for shifts and their respective durations.',
     inputSchema: z.object({
         startDate: z.string().describe('Start date in YYYY-MM-DD format'),
         endDate: z.string().describe('End date in YYYY-MM-DD format'),
