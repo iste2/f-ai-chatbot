@@ -40,8 +40,33 @@ function buildShiftLookup(shifts: Shift[]) {
   return lookup;
 }
 
+// Helper to get all dates between two dates (inclusive)
+function getAllDatesBetween(start: string, end: string): string[] {
+  const result: string[] = [];
+  let current = new Date(start);
+  const endDate = new Date(end);
+  while (current <= endDate) {
+    result.push(current.toISOString().slice(0, 10));
+    current.setDate(current.getDate() + 1);
+  }
+  return result;
+}
+
+// Helper to get the earliest and latest date in the shifts array
+function getDateRange(shifts: Shift[]): { start: string; end: string } | null {
+  if (shifts.length === 0) return null;
+  let min = shifts[0].date;
+  let max = shifts[0].date;
+  for (const s of shifts) {
+    if (s.date < min) min = s.date;
+    if (s.date > max) max = s.date;
+  }
+  return { start: min, end: max };
+}
+
 export const ShiftViewer: React.FC<ShiftViewerProps> = ({ shifts }) => {
-  const dates = getUniqueSortedDates(shifts);
+  const dateRange = getDateRange(shifts);
+  const dates = dateRange ? getAllDatesBetween(dateRange.start, dateRange.end) : [];
   const employees = getUniqueEmployees(shifts);
   const shiftLookup = buildShiftLookup(shifts);
 
@@ -60,7 +85,7 @@ export const ShiftViewer: React.FC<ShiftViewerProps> = ({ shifts }) => {
           <tbody>
             {employees.map((emp) => (
               <tr key={emp.employeeId}>
-                <td className="px-2 py-1 font-medium bg-gray-50 sticky left-0 z-10 dark:bg-gray-900" style={{ background: undefined }}>{emp.employeeName}</td>
+                <td className="px-2 py-1 font-medium bg-gray-50 sticky left-0 z-10 dark:bg-gray-900 whitespace-nowrap" style={{ background: undefined }}>{emp.employeeName}</td>
                 {dates.map((date) => {
                   const shift = shiftLookup[emp.employeeId]?.[date];
                   return (
