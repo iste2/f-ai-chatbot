@@ -64,6 +64,20 @@ function getDateRange(shifts: Shift[]): { start: string; end: string } | null {
   return { start: min, end: max };
 }
 
+// Helper to determine if a color is light or dark and return appropriate text color
+function getContrastTextColor(hexColor: string): string {
+  // Remove # if present
+  const hex = hexColor.replace('#', '');
+  // Parse r, g, b
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  // Calculate luminance (per ITU-R BT.709)
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  // Return black for light backgrounds, white for dark backgrounds
+  return luminance > 150 ? '#222' : '#fff';
+}
+
 export const ShiftViewer: React.FC<ShiftViewerProps> = ({ shifts }) => {
   const dateRange = getDateRange(shifts);
   const dates = dateRange ? getAllDatesBetween(dateRange.start, dateRange.end) : [];
@@ -104,7 +118,11 @@ export const ShiftViewer: React.FC<ShiftViewerProps> = ({ shifts }) => {
                       {shift ? (
                         <div
                           className="rounded shadow text-xs flex flex-col items-center justify-center"
-                          style={{ backgroundColor: shift.colorCode, minWidth: 40, minHeight: 40, width: 40, height: 40 }}
+                          style={{ 
+                            backgroundColor: shift.colorCode, 
+                            color: getContrastTextColor(shift.colorCode),
+                            minWidth: 40, minHeight: 40, width: 40, height: 40 
+                          }}
                           title={`${shift.shiftName} (${shift.duration}h)`}
                         >
                           <span>{shift.shiftName.charAt(0)}</span>
