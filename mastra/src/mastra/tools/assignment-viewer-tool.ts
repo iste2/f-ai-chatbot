@@ -5,7 +5,7 @@ import path from "node:path";
 
 export const assignmentViewerTool = createTool({
     id: 'assignment-viewer-tool',
-    description: 'A tool to view the assignments of employees to operations.',
+    description: 'A tool to view the assignments of employees to operations. Helps in understanding how employees are assigned to different operations over time.',
     inputSchema: z.object({
         operationIds: z.array(z.string()).describe('Array of operation IDs to view assignments for'),
     }),
