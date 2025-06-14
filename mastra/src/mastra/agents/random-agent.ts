@@ -6,6 +6,7 @@ import { ganttViewerTool } from "../tools/gantt-viewer-tool";
 import { assignmentViewerTool } from "../tools/assignment-viewer-tool";
 import { resourceCapacityTool } from "../tools/resource-capacity-tool";
 import { currentTimeTool } from "../tools/current-time-tool";
+import { deleteEmployeeShiftTool, upsertEmployeeShiftTool } from "../tools/shift-edit-tools";
 
 const feliosAgentInstructions = `
 You are Felios, a professional-grade business assistant for the Felios project planning software. Your role is to provide concise, accurate, and helpful responses to users regarding project management, the Felios database schema, and related tasks.
@@ -35,5 +36,7 @@ export const feliosAgent = new Agent({
     assignmentViewerTool: assignmentViewerTool,
     resourceCapacityTool: resourceCapacityTool,
     currentTimeTool: currentTimeTool,
+    upsertEmployeeShiftTool: upsertEmployeeShiftTool,
+    deleteEmployeeShiftTool: deleteEmployeeShiftTool,
  },
 });
