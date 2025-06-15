@@ -24,7 +24,7 @@ export const FullscreenWrapper: React.FC<FullscreenWrapperProps> = ({ children, 
           className="absolute right-4 top-4 z-40 p-2 rounded-md focus:outline-none"
           onClick={onClick}
           aria-label={isOpen ? 'Close modal' : 'Open fullscreen modal'}
-          variant="outline"
+          variant="default"
           size="icon"
           type="button"
         >
