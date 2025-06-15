@@ -135,18 +135,41 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
     rows.push({ type: "project", label: project.name, y, timeline: projectTimeline, id: project.id, color: project.colorCode });
     y += rowHeight;
     if (expandedProjects[project.id]) {
-      for (const ms of project.milestones) {
+      // Sort milestones by dueDate
+      const sortedMilestones = [...project.milestones].sort((a, b) => {
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      });
+      for (const ms of sortedMilestones) {
         const msOps = project.networks.flatMap((n) => n.operations);
         const msTimeline = getTimeline(msOps);
         rows.push({ type: "milestone", label: ms.name, y, milestone: ms, timeline: msTimeline, projectId: project.id, color: project.colorCode });
         y += rowHeight;
       }
-      for (const network of project.networks) {
+      // Sort networks by earliest operation startDate
+      const sortedNetworks = [...project.networks].sort((a, b) => {
+        const aStart = getTimeline(a.operations).start;
+        const bStart = getTimeline(b.operations).start;
+        if (!aStart && !bStart) return 0;
+        if (!aStart) return 1;
+        if (!bStart) return -1;
+        return new Date(aStart).getTime() - new Date(bStart).getTime();
+      });
+      for (const network of sortedNetworks) {
         const nwTimeline = getTimeline(network.operations);
         rows.push({ type: "network", label: network.name, y, timeline: nwTimeline, id: network.id, projectId: project.id, color: project.colorCode });
         y += rowHeight;
         if (expandedNetworks[network.id]) {
-          for (const op of network.operations) {
+          // Sort operations by startDate
+          const sortedOps = [...network.operations].sort((a, b) => {
+            if (!a.startDate && !b.startDate) return 0;
+            if (!a.startDate) return 1;
+            if (!b.startDate) return -1;
+            return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+          });
+          for (const op of sortedOps) {
             rows.push({ type: "operation", label: op.name, y, operation: op, networkId: network.id, projectId: project.id, color: project.colorCode });
             y += rowHeight;
           }
