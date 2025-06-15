@@ -100,7 +100,9 @@ const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
               </tr>
             </thead>
             <tbody>
-              {Object.entries(operations).map(([opId, op]) => {
+              {Object.entries(operations)
+                .sort(([, a], [, b]) => a.operation_startDate.localeCompare(b.operation_startDate))
+                .map(([opId, op]) => {
                 // Use real demand from the first assignment for this operation
                 const opAssignment = op.assignments[0];
                 const totalDemand = opAssignment?.operation_capacityDemand ?? 0;
