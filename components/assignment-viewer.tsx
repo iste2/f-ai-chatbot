@@ -67,17 +67,20 @@ function groupAssignments(assignments: Assignment[]) {
 
 const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
   // Compute date range
-  const { dateRange, operations } = useMemo(() => {
-    if (assignments.length === 0) return { dateRange: [], operations: {} };
+  const { dateRange, sortedOperations } = useMemo(() => {
+    if (assignments.length === 0) return { dateRange: [], sortedOperations: [] };
     let minDate = assignments[0].operation_startDate;
     let maxDate = assignments[0].operation_endDate;
     for (const a of assignments) {
       if (a.operation_startDate < minDate) minDate = a.operation_startDate;
       if (a.operation_endDate > maxDate) maxDate = a.operation_endDate;
     }
+    const operations = groupAssignments(assignments);
+    const sortedOperations = Object.entries(operations)
+      .sort(([, a], [, b]) => a.operation_startDate.localeCompare(b.operation_startDate));
     return {
       dateRange: getDateRange(minDate, maxDate),
-      operations: groupAssignments(assignments),
+      sortedOperations,
     };
   }, [assignments]);
 
@@ -104,9 +107,7 @@ const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
                 </tr>
               </thead>
               <tbody>
-                {Object.entries(operations)
-                  .sort(([, a], [, b]) => a.operation_startDate.localeCompare(b.operation_startDate))
-                  .map(([opId, op]) => {
+                {sortedOperations.map(([opId, op]) => {
                   // Use real demand from the first assignment for this operation
                   const opAssignment = op.assignments[0];
                   const totalDemand = opAssignment?.operation_capacityDemand ?? 0;
