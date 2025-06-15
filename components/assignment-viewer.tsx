@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { FullscreenWrapper } from './fullscreen-wrapper';
 
 // Types matching the outputSchema from assignment-viewer-tool
 export interface Assignment {
@@ -84,71 +85,73 @@ const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
   const toggleExpand = (opId: string) => setExpanded(e => ({ ...e, [opId]: !e[opId] }));
 
   return (
-    <div className="overflow-x-auto">
-      <div className="max-h-96 overflow-y-auto border rounded bg-muted mt-6" style={{ maxHeight: '24rem' }}>
-        <table className="min-w-full border text-sm bg-white dark:bg-gray-900">
-          <thead>
-            <tr>
-              <th className="px-4 py-1 border min-w-[200px] whitespace-nowrap sticky bg-white dark:bg-gray-900 left-0 top-0 z-30 text-gray-900 dark:text-gray-100">Name</th>
-              <th className="px-4 py-1 border min-w-[120px] whitespace-nowrap sticky top-0 bg-white dark:bg-gray-900 z-20 text-gray-900 dark:text-gray-100">Assigned Hours</th>
-              {dateRange.map((date) => (
-                <th key={date} className="p-1 border text-xs sticky top-0 bg-white dark:bg-gray-900 z-10 text-gray-900 dark:text-gray-100">{date.slice(5)}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(operations).map(([opId, op]) => {
-              // Use real demand from the first assignment for this operation
-              const opAssignment = op.assignments[0];
-              const totalDemand = opAssignment?.operation_capacityDemand ?? 0;
-              const totalAssigned = op.assignments.reduce((sum, a) => sum + a.duration, 0);
-              return (
-                <React.Fragment key={opId}>
-                  {/* Operation row */}
-                  <tr className="bg-gray-100 dark:bg-gray-800 cursor-pointer" onClick={() => toggleExpand(opId)}>
-                    <td className="px-4 py-1 border font-semibold flex items-center gap-2 min-w-[200px] whitespace-nowrap bg-white dark:bg-gray-900 sticky left-0 z-20 text-gray-900 dark:text-gray-100">
-                      <span className="inline-block size-3 rounded-full" style={{ background: op.operation_colorCode }} />
-                      {op.operationName}
-                    </td>
-                    <td className="px-4 py-1 border min-w-[120px] whitespace-nowrap text-gray-900 dark:text-gray-100">{totalAssigned} / {totalDemand}h</td>
-                    {dateRange.map((date) => {
-                      const inOp = date >= op.operation_startDate && date <= op.operation_endDate;
+    <FullscreenWrapper>
+      <div className="overflow-x-auto">
+        <div className="max-h-96 overflow-y-auto border rounded bg-muted mt-6" style={{ maxHeight: '24rem' }}>
+          <table className="min-w-full border text-sm bg-white dark:bg-gray-900">
+            <thead>
+              <tr>
+                <th className="px-4 py-1 border min-w-[200px] whitespace-nowrap sticky bg-white dark:bg-gray-900 left-0 top-0 z-30 text-gray-900 dark:text-gray-100">Name</th>
+                <th className="px-4 py-1 border min-w-[120px] whitespace-nowrap sticky top-0 bg-white dark:bg-gray-900 z-20 text-gray-900 dark:text-gray-100">Assigned Hours</th>
+                {dateRange.map((date) => (
+                  <th key={date} className="p-1 border text-xs sticky top-0 bg-white dark:bg-gray-900 z-10 text-gray-900 dark:text-gray-100">{date.slice(5)}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(operations).map(([opId, op]) => {
+                // Use real demand from the first assignment for this operation
+                const opAssignment = op.assignments[0];
+                const totalDemand = opAssignment?.operation_capacityDemand ?? 0;
+                const totalAssigned = op.assignments.reduce((sum, a) => sum + a.duration, 0);
+                return (
+                  <React.Fragment key={opId}>
+                    {/* Operation row */}
+                    <tr className="bg-gray-100 dark:bg-gray-800 cursor-pointer" onClick={() => toggleExpand(opId)}>
+                      <td className="px-4 py-1 border font-semibold flex items-center gap-2 min-w-[200px] whitespace-nowrap bg-white dark:bg-gray-900 sticky left-0 z-20 text-gray-900 dark:text-gray-100">
+                        <span className="inline-block size-3 rounded-full" style={{ background: op.operation_colorCode }} />
+                        {op.operationName}
+                      </td>
+                      <td className="px-4 py-1 border min-w-[120px] whitespace-nowrap text-gray-900 dark:text-gray-100">{totalAssigned} / {totalDemand}h</td>
+                      {dateRange.map((date) => {
+                        const inOp = date >= op.operation_startDate && date <= op.operation_endDate;
+                        return (
+                          <td key={date} className="p-1 border">
+                            {inOp && (
+                              <div className="size-4 mx-auto rounded" style={{ background: op.operation_colorCode, opacity: 0.3 }} />
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                    {/* Employee rows */}
+                    {expanded[opId] && Object.entries(op.employees).map(([empId, emp]) => {
+                      const empTotal = emp.assignments.reduce((sum, a) => sum + a.duration, 0);
                       return (
-                        <td key={date} className="p-1 border">
-                          {inOp && (
-                            <div className="size-4 mx-auto rounded" style={{ background: op.operation_colorCode, opacity: 0.3 }} />
-                          )}
-                        </td>
+                        <tr key={empId} className="bg-white dark:bg-gray-900">
+                          <td className="px-2 py-1 border pl-8 bg-white dark:bg-gray-900 sticky left-0 z-20 text-gray-900 dark:text-gray-100">{emp.employeeName}</td>
+                          <td className="px-2 py-1 border text-gray-900 dark:text-gray-100">{empTotal}h</td>
+                          {dateRange.map((date) => {
+                            const assignment = emp.assignments.find(a => a.date === date);
+                            return (
+                              <td key={date} className="p-1 border">
+                                {assignment && (
+                                  <div className="size-4 mx-auto rounded" style={{ background: op.operation_colorCode }} title={`${assignment.duration}h`} />
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
                       );
                     })}
-                  </tr>
-                  {/* Employee rows */}
-                  {expanded[opId] && Object.entries(op.employees).map(([empId, emp]) => {
-                    const empTotal = emp.assignments.reduce((sum, a) => sum + a.duration, 0);
-                    return (
-                      <tr key={empId} className="bg-white dark:bg-gray-900">
-                        <td className="px-2 py-1 border pl-8 bg-white dark:bg-gray-900 sticky left-0 z-20 text-gray-900 dark:text-gray-100">{emp.employeeName}</td>
-                        <td className="px-2 py-1 border text-gray-900 dark:text-gray-100">{empTotal}h</td>
-                        {dateRange.map((date) => {
-                          const assignment = emp.assignments.find(a => a.date === date);
-                          return (
-                            <td key={date} className="p-1 border">
-                              {assignment && (
-                                <div className="size-4 mx-auto rounded" style={{ background: op.operation_colorCode }} title={`${assignment.duration}h`} />
-                              )}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </React.Fragment>
-              );
-            })}
-          </tbody>
-        </table>
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </FullscreenWrapper>
   );
 };
 

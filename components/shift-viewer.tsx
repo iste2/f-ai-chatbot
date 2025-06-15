@@ -1,4 +1,5 @@
 import React from "react";
+import { FullscreenWrapper } from './fullscreen-wrapper';
 
 type Shift = {
   employeeId: string;
@@ -85,61 +86,65 @@ export const ShiftViewer: React.FC<ShiftViewerProps> = ({ shifts }) => {
   const shiftLookup = buildShiftLookup(shifts);
 
   return (
-    <div className="overflow-x-auto">
-      <div className="max-h-96 overflow-y-auto border rounded bg-muted">
-        <table className="min-w-full border-collapse">
-          <thead>
-            <tr>
-              <th
-                className="px-2 py-1 bg-gray-100 sticky top-0 left-0 z-30 dark:bg-gray-800 whitespace-nowrap align-middle"
-                style={{ background: undefined, height: 40 }}
-              >
-                Employee
-              </th>
-              {dates.map((date) => (
-                <th
-                  key={date}
-                  className="p-0 bg-gray-100 text-xs sticky top-0 z-20 dark:bg-gray-800 align-middle"
-                  style={{ width: 40, minWidth: 40, maxWidth: 40, height: 40, textAlign: 'center' }}
-                >
-                  {date}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {employees.map((emp) => (
-              <tr key={emp.employeeId}>
-                <td className="px-2 py-1 font-medium bg-gray-50 sticky left-0 z-10 dark:bg-gray-900 whitespace-nowrap" style={{ background: undefined }}>{emp.employeeName}</td>
-                {dates.map((date) => {
-                  const shift = shiftLookup[emp.employeeId]?.[date];
-                  return (
-                    <td key={date} className="px-2 py-1 text-center">
-                      {shift ? (
-                        <div
-                          className="rounded shadow text-xs flex flex-col items-center justify-center"
-                          style={{ 
-                            backgroundColor: shift.colorCode, 
-                            color: getContrastTextColor(shift.colorCode),
-                            minWidth: 40, minHeight: 40, width: 40, height: 40 
-                          }}
-                          title={`${shift.shiftName} (${shift.duration}h)`}
-                        >
-                          <span>{shift.shiftName.charAt(0)}</span>
-                          {shift.duration ? (
-                            <span className="text-[10px]">{shift.duration}h</span>
+    <FullscreenWrapper>
+      {(isFullscreen: boolean) => (
+        <div className="overflow-x-auto">
+          <div className={`overflow-y-auto border rounded bg-muted${!isFullscreen ? ' max-h-96' : ''}`}>
+            <table className="min-w-full border-collapse">
+              <thead>
+                <tr>
+                  <th
+                    className="px-2 py-1 bg-gray-100 sticky top-0 left-0 z-30 dark:bg-gray-800 whitespace-nowrap align-middle"
+                    style={{ background: undefined, height: 40 }}
+                  >
+                    Employee
+                  </th>
+                  {dates.map((date) => (
+                    <th
+                      key={date}
+                      className="p-0 bg-gray-100 text-xs sticky top-0 z-20 dark:bg-gray-800 align-middle"
+                      style={{ width: 40, minWidth: 40, maxWidth: 40, height: 40, textAlign: 'center' }}
+                    >
+                      {date}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {employees.map((emp) => (
+                  <tr key={emp.employeeId}>
+                    <td className="px-2 py-1 font-medium bg-gray-50 sticky left-0 z-10 dark:bg-gray-900 whitespace-nowrap" style={{ background: undefined }}>{emp.employeeName}</td>
+                    {dates.map((date) => {
+                      const shift = shiftLookup[emp.employeeId]?.[date];
+                      return (
+                        <td key={date} className="px-2 py-1 text-center">
+                          {shift ? (
+                            <div
+                              className="rounded shadow text-xs flex flex-col items-center justify-center"
+                              style={{ 
+                                backgroundColor: shift.colorCode, 
+                                color: getContrastTextColor(shift.colorCode),
+                                minWidth: 40, minHeight: 40, width: 40, height: 40 
+                              }}
+                              title={`${shift.shiftName} (${shift.duration}h)`}
+                            >
+                              <span>{shift.shiftName.charAt(0)}</span>
+                              {shift.duration ? (
+                                <span className="text-[10px]">{shift.duration}h</span>
+                              ) : null}
+                            </div>
                           ) : null}
-                        </div>
-                      ) : null}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </FullscreenWrapper>
   );
 };
 
