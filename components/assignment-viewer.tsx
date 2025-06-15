@@ -87,7 +87,7 @@ const AssignmentViewer: React.FC<AssignmentViewerProps> = ({ assignments }) => {
   return (
     <FullscreenWrapper>
       <div className="overflow-x-auto">
-        <div className="max-h-96 overflow-y-auto border rounded bg-muted mt-6" style={{ maxHeight: '24rem' }}>
+        <div className="max-h-96 overflow-y-auto border rounded bg-muted" style={{ maxHeight: '24rem' }}>
           <table className="min-w-full border text-sm bg-white dark:bg-gray-900">
             <thead>
               <tr>
