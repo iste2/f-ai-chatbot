@@ -75,14 +75,30 @@ function getTimeline(operations: Operation[]): { start: string | null; end: stri
   };
 }
 
+// Helper to get the earliest start date for a project
+function getProjectEarliestStart(project: Project): string | null {
+  const starts = project.networks.flatMap((n) => n.operations.map((op) => op.startDate)).filter(Boolean) as string[];
+  if (starts.length === 0) return null;
+  return starts.reduce((a, b) => (a < b ? a : b));
+}
+
 // Main GanttViewer component
 export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
+  // Sort projects by earliest start date (ascending)
+  const sortedProjects = [...projects].sort((a, b) => {
+    const aStart = getProjectEarliestStart(a);
+    const bStart = getProjectEarliestStart(b);
+    if (!aStart && !bStart) return 0;
+    if (!aStart) return 1;
+    if (!bStart) return -1;
+    return new Date(aStart).getTime() - new Date(bStart).getTime();
+  });
   // Expansion state (must be before any early return)
   const [expandedProjects, setExpandedProjects] = useState<Record<number, boolean>>({});
   const [expandedNetworks, setExpandedNetworks] = useState<Record<number, boolean>>({});
   // Flatten for date range
-  const allOperations = getAllOperations(projects);
-  const allMilestones = projects.flatMap((p) => p.milestones);
+  const allOperations = getAllOperations(sortedProjects);
+  const allMilestones = sortedProjects.flatMap((p) => p.milestones);
   const [minDate, maxDate] = getDateRange(allOperations, allMilestones);
   if (!minDate || !maxDate) {
     return (
@@ -113,7 +129,7 @@ export const GanttViewer: React.FC<GanttViewerProps> = ({ projects }) => {
     | { type: "operation"; label: string; y: number; operation: Operation; networkId: number; projectId: number; color: string }
   > = [];
   let y = 0;
-  for (const project of projects) {
+  for (const project of sortedProjects) {
     const projectOps = project.networks.flatMap((n) => n.operations);
     const projectTimeline = getTimeline(projectOps);
     rows.push({ type: "project", label: project.name, y, timeline: projectTimeline, id: project.id, color: project.colorCode });
