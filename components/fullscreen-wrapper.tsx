@@ -3,7 +3,6 @@ import { FullscreenIcon } from './icons';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogOverlay
 } from '@/components/ui/dialog';
@@ -31,7 +30,7 @@ export const FullscreenWrapper: React.FC<FullscreenWrapperProps> = ({ children, 
           <FullscreenIcon size={20} />
         </Button>
       )}
-      <div className="size-full h-full w-full overflow-auto flex-1">
+      <div className="size-full overflow-auto flex-1">
         {typeof children === 'function' ? (children(isFullscreen)) : children}
       </div>
     </div>
@@ -39,13 +38,9 @@ export const FullscreenWrapper: React.FC<FullscreenWrapperProps> = ({ children, 
 
   return (
     <div className={className} style={style}>
-      {/* DialogTrigger wraps the button to open fullscreen */}
+      {/* Only the fullscreen button opens the dialog now */}
+      <ContentWithButton onClick={() => setIsOpen(true)} isFullscreen={false} showButton={!isOpen} />
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-          <div>
-            <ContentWithButton onClick={() => setIsOpen(true)} isFullscreen={false} showButton={!isOpen} />
-          </div>
-        </DialogTrigger>
         <DialogContent
           className={
             'bg-white dark:bg-gray-900 rounded-lg shadow-lg p-10 max-w-[98vw] w-[98vw] max-h-[98vh] h-[98vh] flex flex-col ' +
