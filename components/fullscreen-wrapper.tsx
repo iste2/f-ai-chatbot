@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogOverlay
 } from '@/components/ui/dialog';
+import { DialogTitle } from '@radix-ui/react-dialog';
 
 interface FullscreenWrapperProps {
   children: React.ReactNode | ((isFullscreen: boolean) => React.ReactNode);
@@ -41,6 +42,7 @@ export const FullscreenWrapper: React.FC<FullscreenWrapperProps> = ({ children, 
       {/* Only the fullscreen button opens the dialog now */}
       <ContentWithButton onClick={() => setIsOpen(true)} isFullscreen={false} showButton={!isOpen} />
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTitle></DialogTitle>
         <DialogContent
           className={
             'bg-white dark:bg-gray-900 rounded-lg shadow-lg p-10 max-w-[98vw] w-[98vw] max-h-[98vh] h-[98vh] flex flex-col ' +
