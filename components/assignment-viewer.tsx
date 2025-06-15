@@ -28,7 +28,8 @@ function getDateRange(start: string, end: string): string[] {
     result.push(current.toISOString().slice(0, 10));
     current.setDate(current.getDate() + 1);
   }
-  return result;
+  // Ensure unique dates (deduplicate)
+  return Array.from(new Set(result));
 }
 
 // Group assignments by operation, then by employee
